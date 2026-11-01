@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#202b40">
+  <meta name="description" content="Bóc tách tin nhắn và tính tiền đầu đuôi, lô, đá. Một công cụ đơn giản, rõ ràng, xử lý ngay trên trình duyệt.">
+  <title>Sổ Tính — Tính tiền tin nhắn</title>
+  <style>
+    :root{--bg:#f5f6f9;--surface:#fff;--ink:#202939;--muted:#6c7587;--line:#e6e9f0;--green:#3959df;--radius:16px;--accent:#3959df}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 "Segoe UI",-apple-system,BlinkMacSystemFont,Arial,sans-serif;-webkit-font-smoothing:antialiased}button,textarea{font:inherit}button,a{-webkit-tap-highlight-color:transparent}button{cursor:pointer;touch-action:manipulation}a{color:inherit;text-decoration:none}button{transition:background .16s,color .16s,border-color .16s}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #a5b4fc;outline-offset:4px}svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+    .app-header{background:#fff;border-bottom:1px solid var(--line)}.header-inner{max-width:1440px;height:76px;margin:auto;padding:0 44px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:750;letter-spacing:-.7px}.brand-mark{width:37px;height:40px;background:#202939;color:#fff;border-radius:10px;display:grid;place-items:center}.brand-note{margin-left:10px;border-left:1px solid var(--line);padding-left:22px;font-size:12px;font-weight:400;letter-spacing:0;color:var(--muted)}.header-nav{display:flex;align-items:center;gap:28px;font-size:13px;color:var(--muted)}.header-nav a{padding:25px 0}.header-nav a:first-child{color:var(--accent);font-weight:600;border-bottom:2px solid var(--accent)}.header-nav a:hover{color:var(--accent)}.privacy{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}.privacy svg{width:14px;height:14px}
+    main{max-width:1440px;margin:auto;padding:36px 44px 26px}.intro{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;gap:24px}.eyebrow{font-size:10px;letter-spacing:1.6px;color:#8891a2;font-weight:650;text-transform:uppercase}.intro h1{font-size:30px;line-height:1.25;letter-spacing:-1px;margin:6px 0 8px;font-weight:700}.intro p{margin:0;color:var(--muted);font-size:13px}.version{display:flex;align-items:center;gap:7px;font-size:11px;background:#fff;padding:7px 11px;border:1px solid var(--line);border-radius:7px;white-space:nowrap;color:#667085}.version:before{content:"";width:6px;height:6px;background:#709a88;border-radius:50%}
+    .workspace{display:grid;grid-template-columns:minmax(310px,370px) minmax(0,1fr);gap:24px;align-items:start}.workspace>*{min-width:0}.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius)}.input-panel{padding:24px;box-shadow:0 2px 4px #18294d03}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.section-title{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:650;margin:0;letter-spacing:-.3px}.section-title svg{color:#7c8799;width:19px}.step{font-size:10px;color:#a0a7b4;font-variant-numeric:tabular-nums;letter-spacing:1px}.description{font-size:12px;color:var(--muted);margin:7px 0 23px}.input-label{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;margin-bottom:10px;gap:10px}.text-btn{border:0;background:#f0f3ff;color:var(--accent);font-size:11px;font-weight:600;border-radius:6px;padding:6px 9px;min-height:32px}.text-btn:hover{background:#e5eaff}.textarea-wrap{position:relative}textarea{display:block;width:100%;height:255px;min-height:160px;resize:vertical;background:#fafbfe;border:1px solid #dce1eb;border-radius:10px;padding:15px 15px 34px;color:#344054;font:14px/1.95 "Cascadia Code",Consolas,monospace;outline:none;transition:box-shadow .15s,border-color .15s}textarea:focus{background:#fff;border-color:#8196eb;box-shadow:0 0 0 3px #3959df0c}textarea::placeholder{color:#a1a9b8}.char-count{position:absolute;bottom:10px;right:12px;font-size:10px;color:#929caf;background:#fafbfe;padding:0 3px;pointer-events:none}.input-hint{display:flex;align-items:flex-start;gap:6px;font-size:10px;color:#8b94a4;margin-top:9px}.input-hint svg{width:13px;height:13px;margin-top:2px}.actions{display:flex;gap:9px;margin-top:20px}.button{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:9px;border:1px solid var(--line);font-size:13px;font-weight:600;min-height:47px;white-space:nowrap}.button svg{width:17px;height:17px}.button.primary{flex:1;background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 7px #3959df14}.button.primary:hover{background:#2d49c6}.button.secondary{background:#fff;color:#727b8d}.button.secondary:hover{background:#f5f6fa;border-color:#cbd2df}.keyboard-hint{font-size:10px;color:#9ca4b3;text-align:center;margin:9px 0 0}.status-line{font-size:11px;color:#6a8178;margin-top:14px;min-height:18px}.status-line.stale{color:#a57735}.syntax{margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}.syntax summary{display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;cursor:pointer;font-size:12px;color:#667085;font-weight:500;min-height:28px}.syntax summary::-webkit-details-marker{display:none}.syntax summary svg{width:14px;height:14px;transition:transform .2s}.syntax[open] summary svg{transform:rotate(180deg)}.syntax p{color:var(--muted);font-size:11px;margin:12px 0 8px}.example{display:flex;justify-content:space-between;gap:10px;background:#f6f7fb;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:10px}.example code{color:#4e6085;white-space:nowrap}.example span{color:#939baa;text-align:right}.aliases{margin-top:12px;font-size:11px;color:#87909f;line-height:1.9}
+    .result-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:1px 0 14px;min-height:25px}.result-heading h2{font-size:14px;font-weight:600;margin:0;color:#6b7588}.result-badge{display:flex;align-items:center;gap:6px;font-size:10px;color:#758095}.dot{width:5px;height:5px;border-radius:50%;background:#8198c7}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.result-card{padding:20px 18px 15px;min-width:0}.card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:20px}.card-heading{display:flex;align-items:center;gap:9px}.category-icon{width:31px;height:31px;display:grid;place-items:center;color:#6981b7;background:#eff3fa;border-radius:9px}.category-icon svg{width:16px;height:16px}.result-card.lo .category-icon{color:#9b8462;background:#faf4e9}.result-card.da .category-icon{color:#8d79b3;background:#f5f0fa}.result-card.three .category-icon{color:#368778;background:#edf7f4}.result-card h3{margin:0;font-size:14px;font-weight:650;letter-spacing:-.3px}.category-tag{font-size:9px;color:#9ba4b3;font-weight:500;letter-spacing:.5px}.money-table{border-collapse:collapse;width:100%}.money-table tbody{display:block}.money-table tr{display:flex;flex-direction:column;gap:2px;padding:0 0 15px}.money-table th{text-align:left;font-size:11px;font-weight:400;color:#9099a8}.money-table td{text-align:left;font-size:clamp(16px,1.5vw,21px);font-weight:600;color:#344054;font-variant-numeric:tabular-nums;letter-spacing:-.7px;overflow-wrap:anywhere;line-height:1.5}.currency{font-size:9px;font-weight:400;color:#929aa9;letter-spacing:0;margin-left:2px;white-space:nowrap}.money-table .profit{border-top:1px solid #edf0f5;padding:13px 0 0}.money-table .profit th{color:#7d899c}.money-table .profit td{color:var(--accent);font-weight:650}.category-total{font-size:10px;color:#99a1af;margin-top:15px;padding-top:12px;border-top:1px solid #f0f2f6}
+    .total{grid-column:1/-1;order:-1;padding:22px 24px 16px;background:#202b40;border-color:#202b40;color:#fff;box-shadow:0 6px 20px #202b400b}.total .card-top{margin-bottom:19px}.total .category-icon{background:#ffffff0d;color:#bac6de;width:29px;height:29px}.total h3{font-size:13px;font-weight:500;letter-spacing:0;color:#e6ebf6}.total .category-tag{color:#8796b2;font-size:9px;letter-spacing:1px}.total .money-table tbody{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}.total .money-table tr{padding:0;gap:7px;min-width:0}.total .money-table th{color:#9cabc2;font-size:10px;white-space:nowrap}.total .money-table td{color:#f5f7fd;font-size:clamp(19px,1.85vw,27px);letter-spacing:-.8px;line-height:1.25}.total .money-table .profit{border:0;border-left:1px solid #ffffff1a;padding-left:19px}.total .money-table .profit td{color:#c9d5ff}.total .currency{color:#8e9db6;font-size:9px}.total .category-total{border-color:#ffffff0d;color:#8191ae;margin-top:20px;padding-top:10px;font-size:10px}.result-footnote{display:flex;align-items:flex-start;gap:6px;font-size:10px;color:#969faf;margin:12px 2px 0;line-height:1.6}.result-footnote svg{width:12px;height:12px;margin-top:2px}
+    .winning-summary-box{margin-top:16px;padding:14px 16px;background:#ffffff0d;border:1px solid #ffffff1a;border-radius:12px}.winning-box-title{font-size:10px;font-weight:600;letter-spacing:1px;color:#9cabc2;margin-bottom:10px;text-transform:uppercase}.winning-box-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.winning-sub-box{background:#1a2335;border:1px solid #ffffff14;border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}.winning-sub-title{font-size:10px;color:#94a3b8;font-weight:500;margin-bottom:4px}.winning-sub-val{font-size:clamp(17px,1.6vw,22px);font-weight:700;color:#93c5fd;font-variant-numeric:tabular-nums;line-height:1.3;overflow-wrap:anywhere}
+    .winning-sub-status{margin-top:6px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;width:max-content;max-width:100%}
+    .status-loss{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}
+    .status-win{background:#143825;color:#86efac;border:1px solid #166534}
+    .status-neutral{background:#1e293b;color:#cbd5e1;border:1px solid #334155}
+
+    /* Details Panel — Modern Clean Design */
+    .details-panel{margin-top:28px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.02)}
+    .details-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:20px 28px;border-bottom:1px solid #edf0f5;background:#fff}
+    .details-title-group{display:flex;align-items:baseline;gap:14px}
+    .details-title-group h2{font-size:17px;font-weight:700;color:#1e293b;margin:0;letter-spacing:-.3px}
+    .entry-badge{font-size:12px;color:#8891a2;font-weight:400}
+    .details-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .detail-actions{display:flex;align-items:center;gap:6px}
+    .action-btn{border:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:11px;font-weight:600;border-radius:7px;padding:6px 12px;cursor:pointer;transition:all .15s}
+    .action-btn:hover{background:#edf2f7;color:#1e293b;border-color:#cbd5e1}
+    .action-btn.secondary{color:#64748b;background:#fff}
+    .action-btn.secondary:hover{background:#fef2f2;color:#dc2626;border-color:#fecaca}
+    .tabs{display:inline-flex;align-items:center;background:#f1f4f9;padding:3px;border-radius:9px;gap:3px;border:1px solid #e9edf4}
+    .filter{border:0;background:transparent;color:#64748b;font-size:12px;font-weight:500;border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .filter:hover[aria-pressed="false"]{color:var(--accent);background:rgba(255,255,255,0.7)}
+    .filter[aria-pressed="true"]{background:#fff;color:#1e293b;font-weight:650;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+    .table-scroll{width:100%;overflow-x:auto;max-height:540px}
+    .detail-table{width:100%;border-collapse:collapse;text-align:left}
+    .detail-table thead{background:#fafbfe;position:sticky;top:0;z-index:2}
+    .detail-table th{padding:14px 24px;font-size:11px;font-weight:650;color:#8891a2;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #edf0f5;white-space:nowrap}
+    .detail-table td{padding:14px 24px;font-size:13px;color:#334155;border-bottom:1px solid #f1f4f9;vertical-align:middle;transition:background .12s}
+    .detail-table tbody tr:hover td{background:#fafbfe}
+    .detail-table tbody tr.row-won td{background:#f0fdf4!important;color:#166534}
+    .detail-table tbody tr.row-won:hover td{background:#e8f9ed!important}
+    .col-stt{width:56px;color:#94a3b8;font-size:12px;font-variant-numeric:tabular-nums}
+    .col-win{width:100px;text-align:center}
+    .col-val{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;width:100px}
+    .col-win-money{text-align:right;width:150px}
+    .col-source{text-align:right}
+    .win-input{width:48px;height:30px;text-align:center;font-size:13px;font-weight:700;border:1px solid #d8e0ec;border-radius:7px;background:#fafbfe;color:#334155;outline:none;padding:0 4px;transition:all .15s ease;-moz-appearance:textfield}
+    .win-input::-webkit-outer-spin-button,.win-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .win-input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(57,89,223,0.15)}
+    .win-input.has-win{border-color:#22c55e;background:#ecfdf5;color:#15803d;box-shadow:0 1px 2px rgba(22,163,74,0.12)}
+    .number-chip{display:inline-flex;align-items:center;justify-content:center;background:#f1f4f9;color:#1e293b;font-weight:700;font-size:13px;padding:4px 11px;border-radius:8px;min-width:38px;text-align:center;border:1px solid #e8ecf4}
+    .type-chip{display:inline-block;font-size:11px;font-weight:650;padding:4px 10px;border-radius:6px;text-align:center;white-space:nowrap}
+    .type-chip.lo{background:#faf4e9;color:#9b8462}
+    .type-chip.da{background:#f5f0fa;color:#8d79b3}
+    .type-chip.dd{background:#eff3fa;color:#3959df}
+    .type-chip.three{background:#edf7f4;color:#368778}
+    .win-cell{font-variant-numeric:tabular-nums;font-weight:650;text-align:right;white-space:nowrap;font-size:13px}
+    .win-cell.win-active{color:#15803d}
+    .source-text{color:#8891a2;font-family:"Cascadia Code",Consolas,monospace;font-size:12px}
+    .table-empty{text-align:center;padding:44px 20px!important;color:#94a3b8!important;font-size:13px!important}
+    .table-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 28px;background:#fafbfe;border-top:1px solid #edf0f5;font-size:12px;color:#8891a2}
+    .app-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:28px;padding-bottom:32px;font-size:12px;color:#94a3b8}
+    .footer-sign{display:inline-flex;align-items:center;gap:8px;color:#64748b;font-weight:500}
+
+    @media(min-width:1440px){main{padding-top:44px}.intro{margin-bottom:32px}.workspace{grid-template-columns:400px minmax(0,1fr);gap:28px}.input-panel{padding:27px}textarea{height:278px}.result-card{padding:23px 23px 18px}.total{padding:25px 28px 18px}.money-table tr{padding-bottom:20px}.money-table .profit{padding-top:17px}.total .money-table tr{padding:0}.total .money-table .profit{padding-left:22px}}
+    @media(max-width:1150px){main{padding:30px 26px}.header-inner{padding:0 26px}.workspace{grid-template-columns:310px minmax(0,1fr);gap:20px}.input-panel{padding:20px}.result-card{padding:17px 13px 14px}.card-top{gap:4px}.card-heading{gap:6px}.category-icon{width:26px;height:28px}.result-card h3{font-size:13px}.total{padding:21px}.total .money-table tbody{gap:12px}.total .money-table td{font-size:22px}.total .money-table .profit{padding-left:13px}.money-table td{font-size:17px}.category-total{font-size:9px}.total .category-total{font-size:10px}.brand-note{display:none}}
+    @media(max-width:980px){main{padding:28px 24px}.workspace{grid-template-columns:1fr}.input-panel{display:grid;grid-template-columns:1fr 1fr;column-gap:24px;padding:24px}.section-head,.description,.input-label,.textarea-wrap,.input-hint{grid-column:1}.section-head{grid-row:1}.description{grid-row:2;margin-bottom:20px}.input-label{grid-row:3}.textarea-wrap{grid-row:4/8}.input-hint{grid-row:8}.actions{grid-column:2;grid-row:4;margin-top:0;align-self:start;flex-wrap:wrap}.button.primary{flex-basis:100%}.button.secondary{width:100%}.keyboard-hint{grid-column:2;grid-row:5}.status-line{grid-column:2;grid-row:6;margin-top:10px}.syntax{grid-column:2;grid-row:7/9;margin-top:12px}textarea{height:210px}.cards{gap:16px}.result-card{padding:22px}.card-heading{gap:10px}.category-icon{width:32px;height:32px}.result-card h3{font-size:15px}.total{padding:25px}.total .money-table td{font-size:28px}.money-table td{font-size:22px}.category-total{font-size:10px}.total .money-table .profit{padding-left:25px}.header-nav{margin-left:auto}.privacy{display:none}.result-heading{margin-top:5px}}
+    @media(max-width:640px){html{scroll-padding-top:24px}.header-inner{height:65px;padding:0 20px}.brand{font-size:20px;gap:9px}.brand-mark{width:31px;height:34px;border-radius:8px}.brand-mark svg{width:19px}.header-nav{gap:22px;font-size:12px}.header-nav a{padding:20px 0}.header-nav a:first-child{border-bottom:0;color:#8792a6;font-weight:400}.header-nav a:last-child{color:#8792a6}main{padding:25px 17px calc(112px + env(safe-area-inset-bottom))}.intro{margin-bottom:23px}.intro h1{font-size:27px;letter-spacing:-.9px;margin:6px 0 9px}.intro p{font-size:12px;max-width:280px;line-height:1.7}.eyebrow{font-size:9px}.version{display:none}.input-panel{display:block;padding:20px;border-radius:14px}.section-title{font-size:16px}.description{font-size:11px;margin:6px 0 20px}.step{font-size:9px}.input-label{font-size:11px}.text-btn{font-size:10px;min-height:32px}.textarea-wrap textarea{height:205px;min-height:160px;font-size:16px;line-height:1.8;padding:13px 13px 30px}.input-hint{font-size:10px;line-height:1.6}.actions{position:fixed;left:0;right:0;bottom:0;margin:0;padding:12px 17px calc(12px + env(safe-area-inset-bottom));background:#fffffff5;backdrop-filter:blur(12px);border-top:1px solid var(--line);box-shadow:0 -5px 25px #202b4005;z-index:4;flex-wrap:nowrap;gap:10px}.actions .button{min-height:48px;font-size:14px;border-radius:10px}.actions .button.primary{flex:1;flex-basis:auto}.actions .button.secondary{width:auto;flex:0 0 auto;padding:12px 16px}.keyboard-hint{display:none}.status-line{font-size:10px;margin-top:11px}.syntax{margin-top:14px;padding-top:13px}.syntax summary{font-size:11px;min-height:30px}.example{font-size:10px;padding:9px}.aliases{font-size:11px}.workspace{gap:23px}.result-heading{margin:0 1px 12px}.result-heading h2{font-size:13px}.result-badge{font-size:9px}.cards{grid-template-columns:1fr;gap:12px}.result-card{padding:18px 20px;border-radius:13px}.card-top{margin-bottom:17px}.card-heading{gap:9px}.result-card h3{font-size:14px}.category-icon{width:29px;height:29px}.category-tag{font-size:10px}.money-table tbody{display:table-row-group}.money-table tr{display:table-row;padding:0}.money-table th{font-size:12px;padding:7px 0;max-width:150px}.money-table td{text-align:right;font-size:17px;padding-left:12px;line-height:1.7;overflow-wrap:anywhere;letter-spacing:-.5px}.currency{font-size:9px}.money-table .profit th,.money-table .profit td{padding-top:11px;border-top:1px solid var(--line)}.money-table .profit td{font-size:21px}.category-total{padding-top:10px;margin-top:13px;font-size:10px}.total{padding:21px 21px 14px;border-radius:14px}.total .card-top{margin-bottom:17px}.total .money-table tbody{display:grid;grid-template-columns:1fr;gap:11px}.total .money-table tr{display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;gap:10px}.total .money-table th{padding:0;color:#a4b0c5;font-size:11px;white-space:normal}.total .money-table td{padding:0;font-size:20px;text-align:right;max-width:65%;overflow-wrap:anywhere}.total .money-table .profit{padding:13px 0 0;margin-top:3px;border-left:0;border-top:1px solid #ffffff1a}.total .money-table .profit th{border:0;padding:0;color:#c8d2e7}.total .money-table .profit td{padding:0;border:0;font-size:29px;letter-spacing:-1px}.total .category-total{padding-top:10px;margin-top:17px}.total .currency{font-size:9px}
+      .details-panel{margin-top:20px;border-radius:14px}
+      .details-heading{padding:16px 18px;flex-direction:column;align-items:stretch;gap:12px}
+      .details-title-group{justify-content:space-between}
+      .details-controls{flex-direction:column;align-items:stretch;gap:10px}
+      .detail-actions{justify-content:flex-end}
+      .tabs{width:100%;padding:4px;gap:4px}
+      .filter{flex:1;text-align:center;padding:7px 4px;font-size:11px}
+      .detail-table th,.detail-table td{padding:10px 12px}
+      .detail-table th:first-child,.detail-table td:first-child,.detail-table th:last-child,.detail-table td:last-child{display:none}
+      .col-win{width:56px;padding:10px 4px}
+      .table-footer{padding:12px 18px;flex-direction:column;align-items:flex-start;gap:6px;font-size:10px}
+      .app-footer{flex-direction:column;text-align:center;gap:6px;font-size:10px}
+    }
+    @media(max-width:360px){main{padding-left:12px;padding-right:12px}.header-inner{padding:0 15px}.header-nav{gap:14px}.input-panel{padding:17px}.result-card{padding:17px}.total{padding:19px}.total .money-table td{font-size:18px}.total .money-table .profit td{font-size:26px}.money-table th{font-size:11px}.money-table td{font-size:16px}.actions{padding-left:12px;padding-right:12px}.actions .button{font-size:13px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+    .region-bar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:0 0 24px;padding:17px 20px;background:#fff;border:1px solid var(--line);border-radius:12px}.region-copy{min-width:0}.region-copy h2{font-size:13px;font-weight:600;margin:0 0 3px}.region-copy p{font-size:11px;color:var(--muted);margin:0;line-height:1.7}.region-options{display:flex;flex-shrink:0;background:#f4f6fa;padding:4px;border:1px solid #edf0f5;border-radius:9px;gap:4px}.region-button{border:0;background:transparent;border-radius:6px;min-height:39px;padding:8px 19px;color:#8993a5;font-size:12px;font-weight:500}.region-button[aria-pressed="true"]{background:var(--accent);color:white;box-shadow:0 2px 5px #3959df16}.region-button:hover[aria-pressed="false"]{background:#e8edfa;color:var(--accent)}
+    .result-heading{flex-wrap:wrap}.region-description{max-width:700px}
+    @media(max-width:640px){.region-bar{display:block;padding:16px 18px;margin-bottom:18px;border-radius:12px}.region-copy h2{font-size:12px}.region-copy p{font-size:10px}.region-options{margin-top:13px;width:100%;gap:5px}.region-button{flex:1;min-height:43px;font-size:13px;padding:10px 12px}.result-badge{font-size:9px}}
+
+    .cards{grid-template-columns:repeat(2,minmax(0,1fr))}.result-card:not(.total) .money-table tbody{display:table-row-group}.result-card:not(.total) .money-table tr{display:table-row}.result-card:not(.total) .money-table th{padding:7px 0}.result-card:not(.total) .money-table td{text-align:right;font-size:18px;padding-left:10px}.result-card:not(.total) .money-table .profit th,.result-card:not(.total) .money-table .profit td{padding-top:12px;border-top:1px solid var(--line)}.example-three{color:#368778}
+    @media(max-width:1150px){.result-card:not(.total) .money-table th{font-size:10px}.result-card:not(.total) .money-table td{font-size:16px}}
+    @media(max-width:980px){.result-card:not(.total) .money-table th{font-size:12px}.result-card:not(.total) .money-table td{font-size:20px}}
+    @media(max-width:640px){.cards{grid-template-columns:1fr}.result-card:not(.total) .money-table th{font-size:12px}.result-card:not(.total) .money-table td{font-size:17px}.result-card:not(.total) .money-table .profit td{font-size:21px}}
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M6 3h13v18H6a3 3 0 0 1 0-6h13M6 3a3 3 0 0 0-3 3v12M8 7h7M8 10h5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3zM7 8h10M7 12h7"/></symbol>
+    <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M8 6h8M8 11h1m6 0h1m-8 4h1m6 0h1m-8 4h1m6 0h1"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3m-10 0 1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrows" viewBox="0 0 24 24"><path d="M4 7h15m-4-4 4 4-4 4M20 17H5m4-4-4 4 4 4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 13 4-4m-6 6-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 2 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(1 1)"/></symbol>
+    <symbol id="i-sum" viewBox="0 0 24 24"><path d="M18 4H6l7 8-7 8h12"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  </defs></svg>
+  <header class="app-header"><div class="header-inner"><a class="brand" href="#top" aria-label="Sổ Tính — đầu trang"><span class="brand-mark"><svg aria-hidden="true"><use href="#i-book"/></svg></span>Sổ Tính<span class="brand-note">Công cụ tính tiền tin nhắn</span></a><nav class="header-nav" aria-label="Điều hướng"><a href="#top">Bảng tính</a><a href="#guide">Cú pháp</a></nav><div class="privacy"><svg aria-hidden="true"><use href="#i-lock"/></svg>Dữ liệu chỉ trên thiết bị</div></div></header>
+  <main id="top">
+    <div class="intro"><div><div class="eyebrow">BẢNG TÍNH TIN NHẮN</div><h1>Tính tiền tin nhắn</h1><p>Nhập nội dung, xem tổng tiền và kiểm tra từng con số.</p></div><span class="version">Thêm bảng 3 chân · 04</span></div>
+    <section class="region-bar" aria-labelledby="region-heading"><div class="region-copy"><h2 id="region-heading">Khu vực tính</h2><p id="region-description" class="region-description" aria-live="polite">Miền Trung: áp dụng cách tính hiện tại. Mỗi số trong nhóm nhận cùng giá trị.</p></div><div class="region-options" role="group" aria-label="Chọn cách tính theo miền"><button type="button" class="region-button" data-region="central" aria-pressed="true" aria-controls="results">Miền Trung</button><button type="button" class="region-button" data-region="north" aria-pressed="false" aria-controls="results">Miền Bắc</button></div></section>
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <div class="section-head"><h2 class="section-title" id="input-heading"><svg aria-hidden="true"><use href="#i-message"/></svg>Nội dung tin nhắn</h2><span class="step">01</span></div>
+        <p class="description">Dán toàn bộ tin nhắn vào ô bên dưới.</p>
+        <div class="input-label"><label for="message">Dữ liệu đầu vào</label><button class="text-btn" id="sample" type="button">Thử mẫu</button></div>
+        <div class="textarea-wrap"><textarea id="message" spellcheck="false" maxlength="100000" aria-describedby="input-hint status" placeholder="Nhập tin nhắn tại đây…&#10;&#10;Ví dụ:&#10;07 lo 30 dd 140&#10;88-39-79 dd 10&#10;24-42 da 2&#10;45 đầu 10 đuôi 40"></textarea><span class="char-count" id="char-count">0 ký tự</span></div>
+        <div class="input-hint" id="input-hint"><svg aria-hidden="true"><use href="#i-info"/></svg>Hỗ trợ nhiều dòng, dấu gạch ngang và dấu phẩy.</div>
+        <div class="actions"><button id="calculate" class="button primary" type="button"><svg aria-hidden="true"><use href="#i-calc"/></svg>Tính Toán</button><button id="clear" class="button secondary" type="button"><svg aria-hidden="true"><use href="#i-trash"/></svg>Xóa Dữ Liệu</button></div>
+        <p class="keyboard-hint">Mẹo nhỏ: Ctrl / ⌘ + Enter để tính nhanh</p>
+        <div class="status-line" id="status" role="status" aria-live="polite">Sẵn sàng tính toán.</div>
+        <details class="syntax" id="guide"><summary>Hướng dẫn nhập tin nhắn <svg aria-hidden="true"><use href="#i-chevron"/></svg></summary><p>Cấu trúc: danh sách số → thể loại → giá trị</p><div class="example"><code>07 lo 30 dd 140</code><span>Một số, nhiều thể loại</span></div><div class="example"><code>88-39-79 dd 10</code><span>Mỗi số nhận 10</span></div><div class="example"><code>45 đầu 10 đuôi 40</code><span>Đầu 10 · Đuôi 40</span></div><div class="example"><code>24-42 da 2</code><span id="stone-example">Cặp đá gộp thành 1 ô có giá trị tương ứng</span></div><div class="example example-three"><code>091-190 lo 10</code><span>3 chân · mỗi số 10</span></div><div class="aliases"><strong>Đầu đuôi:</strong> dd, đầu đuôi, đầu ... đuôi ...<br><strong>Lô:</strong> lo, lô &nbsp; · &nbsp; <strong>Đá:</strong> da, đá<br>Số 2 chữ số: đầu đuôi, đầu/đuôi, lô, đá. Số từ 3 chữ số trở lên + lo: 3 chân. Điểm thập phân dùng dấu chấm.</div></details>
+      </section>
+      <section id="results" aria-labelledby="results-heading"><div class="result-heading"><h2 id="results-heading">Kết quả tính toán</h2><span class="result-badge" id="result-badge"><span class="dot"></span>Chưa có dữ liệu</span></div><div id="warnings" class="notice" role="status" hidden></div><div class="cards" id="cards" aria-live="polite" aria-atomic="true"></div><p class="result-footnote"><svg aria-hidden="true"><use href="#i-info"/></svg>Tiền được làm tròn đến đồng tại mỗi thể loại. Tổng cộng bằng tổng các bảng đã làm tròn.</p></section>
+    </div>
+    <section class="panel details-panel" aria-labelledby="details-heading">
+      <div class="details-heading">
+        <div class="details-title-group">
+          <h2 id="details-heading">Chi tiết bóc tách</h2>
+          <span id="entry-count" class="entry-badge">0 mục được nhận diện</span>
+        </div>
+        <div class="details-controls">
+          <div class="detail-actions">
+            <button type="button" class="action-btn" id="btn-select-all">Tất cả trúng 1 lần</button>
+            <button type="button" class="action-btn secondary" id="btn-clear-win">Bỏ trúng</button>
+          </div>
+          <div class="tabs" role="group" aria-label="Lọc theo thể loại">
+            <button class="filter" data-filter="all" aria-pressed="true">Tất cả</button>
+            <button class="filter" data-filter="dd" aria-pressed="false">Đầu đuôi</button>
+            <button class="filter" data-filter="lo" aria-pressed="false">Lô</button>
+            <button class="filter" data-filter="da" aria-pressed="false">Đá</button>
+            <button class="filter" data-filter="three" aria-pressed="false">3 chân</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th class="col-stt">STT</th>
+              <th class="col-win">TRÚNG (LẦN)</th>
+              <th>CON SỐ</th>
+              <th>THỂ LOẠI</th>
+              <th class="col-val">GIÁ TRỊ</th>
+              <th class="col-win-money">TIỀN TRÚNG</th>
+              <th class="col-source">CÚ PHÁP NHẬN DIỆN</th>
+            </tr>
+          </thead>
+          <tbody id="detail-body"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="detail-summary">Chưa có dữ liệu để hiển thị</span>
+        <span id="counting-note">Đá được gộp thành từng cặp riêng trên mỗi dòng</span>
+      </div>
+    </section>
+    <footer class="app-footer"><span class="footer-sign"><svg aria-hidden="true"><use href="#i-book"/></svg>Sổ Tính · Công cụ tính tiền tin nhắn</span><span>Dữ liệu chỉ được xử lý trong trình duyệt.</span></footer>
+  </main>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script id="calculator-engine">
+    'use strict';
+    const Calculator = (() => {
+      const SAMPLE = '04 dd 60--20 dd 30-10 dd 20--50 dd 30--90 dd 70--01 dd 20---52 dd 30--07 lo 30 - 70 lo 15- 05 lo 10 -- 04 lo 3 ----24-42 da 2';
+      const names = { dd: 'Đầu đuôi', lo: 'Lô', da: 'Đá', three: '3 chân' };
+      const NORTH_SAMPLE = '05 lo 10 dd 10 -- 05-50 đá 10';
+      const regions = Object.freeze({
+        central: Object.freeze({ name: 'Miền Trung', initial: { dd: 2000 / 1.2, lo: 13500, da: 13500, three: 13500 }, payable: { dd: 1420, lo: 13000, da: 12000, three: 12000 } }),
+        north: Object.freeze({ name: 'Miền Bắc', initial: { dd: 5000, lo: 23000, da: 23000, three: 20000 }, payable: { dd: 4050, lo: 22000, da: 20000, three: 18000 } })
+      });
+      const winningRates = Object.freeze({
+        central: Object.freeze({ dd: 70000, lo: 70000, da: 500000, three: 500000 }),
+        north: Object.freeze({ dd: 80000, lo: 80000, da: 600000, three: 600000 })
+      });
+      const getRegion = region => {
+        if (!Object.hasOwn(regions, region)) throw new RangeError('Khu vực tính không hợp lệ.');
+        return regions[region];
+      };
+      const MAX_POINTS = 1e9;
+      function parse(input, region = 'central') {
+        getRegion(region);
+        const text = String(input).normalize('NFC');
+        const tokens = [], warnings = [], entries = [];
+        const sums = { dd: 0, lo: 0, da: 0, three: 0 };
+        if (text.length > 100000) return { entries, sums, warnings: [{line: 1, fragment: '', message: 'Tin nhắn vượt quá 100.000 ký tự.'}] };
+        // Unicode boundaries prevent matching keywords inside unrelated words.
+        const lexer = /(?<![\p{L}\p{N}_])(?:đầu\s+đuôi|dau\s+duoi|dd|đầu|dau|đuôi|duoi|lô|lo|đá|da)(?![\p{L}\p{N}_])|\d+(?:\.\d+)?|[\s,;:|\-–—]+|[^\s\d,;:|\-–—]+/giu;
+        let match;
+        while ((match = lexer.exec(text))) {
+          const value = match[0];
+          if (/^[\s,;:|\-–—]+$/u.test(value)) continue;
+          const plain = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ');
+          const aliases = { dd: 'dd', 'dau duoi': 'dd', dau: 'dau', duoi: 'duoi', lo: 'lo', da: 'da' };
+          const category = Object.hasOwn(aliases, plain) ? aliases[plain] : undefined;
+          tokens.push({ type: category ? 'key' : /^\d+(?:\.\d+)?$/.test(value) ? 'number' : 'unknown', category, value, start: match.index, end: lexer.lastIndex });
+        }
+        const warn = (token, message) => warnings.push({ line: text.slice(0, token.start).split('\n').length, fragment: token.value.slice(0, 45), message });
+        let activeNumbers = [], i = 0;
+        while (i < tokens.length) {
+          const token = tokens[i];
+          if (token.type === 'unknown') { warn(token, 'Không nhận diện được nội dung này.'); activeNumbers = []; i++; continue; }
+          if (token.type === 'number') {
+            const group = [];
+            while (i < tokens.length && tokens[i].type === 'number') group.push(tokens[i++]);
+            if (group.some(t => !/^\d{2,}$/.test(t.value))) {
+              warn(group[0], 'Danh sách số cần ít nhất 2 chữ số; số từ 3 chữ số trở lên dùng cho bảng 3 chân với từ khóa lo.'); activeNumbers = [];
+            } else activeNumbers = group;
+            if (i === tokens.length || tokens[i].type !== 'key') {
+              warn(group[0], 'Danh sách số thiếu thể loại và giá trị.'); activeNumbers = [];
+            }
+            continue;
+          }
+
+          // Case 1: dau or duoi
+          if (token.category === 'dau' || token.category === 'duoi') {
+            let valDau = 0, valDuoi = 0;
+            let consumed = 0;
+            const amount1 = tokens[i + 1];
+            if (!amount1 || amount1.type !== 'number') {
+              warn(token, 'Thiếu giá trị sau từ khóa ' + token.value + '.');
+              activeNumbers = []; i++; continue;
+            }
+            const val1 = Number(amount1.value);
+            if (/[-–—]/.test(text.slice(token.end, amount1.start)) || !Number.isFinite(val1) || val1 < 0 || val1 > MAX_POINTS) {
+              warn(amount1, 'Giá trị phải từ 0 đến 1.000.000.000 và không có dấu âm.');
+              activeNumbers = []; i += 2; continue;
+            }
+
+            if (token.category === 'dau') {
+              valDau = val1;
+              const nextKey = tokens[i + 2];
+              const nextAmount = tokens[i + 3];
+              if (nextKey && nextKey.category === 'duoi' && nextAmount && nextAmount.type === 'number') {
+                const val2 = Number(nextAmount.value);
+                if (!/[-–—]/.test(text.slice(nextKey.end, nextAmount.start)) && Number.isFinite(val2) && val2 >= 0 && val2 <= MAX_POINTS) {
+                  valDuoi = val2;
+                  consumed = 4;
+                } else {
+                  consumed = 2;
+                }
+              } else {
+                consumed = 2;
+              }
+            } else {
+              valDuoi = val1;
+              const nextKey = tokens[i + 2];
+              const nextAmount = tokens[i + 3];
+              if (nextKey && nextKey.category === 'dau' && nextAmount && nextAmount.type === 'number') {
+                const val2 = Number(nextAmount.value);
+                if (!/[-–—]/.test(text.slice(nextKey.end, nextAmount.start)) && Number.isFinite(val2) && val2 >= 0 && val2 <= MAX_POINTS) {
+                  valDau = val2;
+                  consumed = 4;
+                } else {
+                  consumed = 2;
+                }
+              } else {
+                consumed = 2;
+              }
+            }
+
+            if (!activeNumbers.length) {
+              warn(token, 'Từ khóa chưa có danh sách số hợp lệ ở phía trước.');
+              i += consumed; continue;
+            }
+
+            const shortNumbers = activeNumbers.filter(number => number.value.length === 2);
+            const longNumbers = activeNumbers.filter(number => number.value.length >= 3);
+            if (longNumbers.length) {
+              warn(token, 'Đầu/đuôi chỉ áp dụng cho số 2 chữ số.');
+            }
+            if (!shortNumbers.length) {
+              i += consumed; continue;
+            }
+
+            const addDau = valDau * shortNumbers.length;
+            const addDuoi = valDuoi * shortNumbers.length;
+            sums.dau = (sums.dau || 0) + addDau;
+            sums.duoi = (sums.duoi || 0) + addDuoi;
+
+            for (const number of shortNumbers) {
+              const line = text.slice(0, number.start).split('\n').length;
+              entries.push({
+                number: number.value,
+                category: 'dd',
+                subType: 'dau',
+                label: 'Đầu',
+                value: valDau,
+                line,
+                keyword: 'đầu',
+                sourceText: number.value + ' đầu ' + valDau
+              });
+              entries.push({
+                number: number.value,
+                category: 'dd',
+                subType: 'duoi',
+                label: 'Đuôi',
+                value: valDuoi,
+                line,
+                keyword: 'đuôi',
+                sourceText: number.value + ' đuôi ' + valDuoi
+              });
+            }
+
+            i += consumed;
+            continue;
+          }
+
+          // Case 2: dd
+          if (token.category === 'dd') {
+            const amount = tokens[i + 1];
+            if (!amount || amount.type !== 'number') { warn(token, 'Thiếu giá trị sau từ khóa.'); activeNumbers = []; i++; continue; }
+            const value = Number(amount.value);
+            if (/[-–—]/.test(text.slice(token.end, amount.start)) || !Number.isFinite(value) || value < 0 || value > MAX_POINTS) {
+              warn(amount, 'Giá trị phải từ 0 đến 1.000.000.000 và không có dấu âm.'); activeNumbers = []; i += 2; continue;
+            }
+            if (!activeNumbers.length) { warn(token, 'Từ khóa chưa có danh sách số hợp lệ ở phía trước.'); i += 2; continue; }
+            const shortNumbers = activeNumbers.filter(number => number.value.length === 2);
+            const longNumbers = activeNumbers.filter(number => number.value.length >= 3);
+            if (longNumbers.length) {
+              warn(token, 'Số từ 3 chữ số trở lên không thuộc đầu đuôi.');
+            }
+            if (!shortNumbers.length) { i += 2; continue; }
+
+            const addition = value * shortNumbers.length;
+            if (sums.dd + addition > MAX_POINTS) {
+              warn(amount, 'Tổng giá trị Đầu đuôi vượt giới hạn 1.000.000.000.'); i += 2; continue;
+            }
+            sums.dd += addition;
+
+            for (const number of shortNumbers) {
+              const line = text.slice(0, number.start).split('\n').length;
+              entries.push({
+                number: number.value,
+                category: 'dd',
+                subType: 'dau',
+                label: 'Đầu',
+                value,
+                line,
+                keyword: 'đầu',
+                sourceText: number.value + ' đầu ' + value
+              });
+              entries.push({
+                number: number.value,
+                category: 'dd',
+                subType: 'duoi',
+                label: 'Đuôi',
+                value,
+                line,
+                keyword: 'đuôi',
+                sourceText: number.value + ' đuôi ' + value
+              });
+            }
+
+            i += 2;
+            continue;
+          }
+
+          // Case 3: lo, da
+          const amount = tokens[i + 1];
+          if (!amount || amount.type !== 'number') { warn(token, 'Thiếu giá trị sau từ khóa.'); activeNumbers = []; i++; continue; }
+          const value = Number(amount.value);
+          if (/[-–—]/.test(text.slice(token.end, amount.start)) || !Number.isFinite(value) || value < 0 || value > MAX_POINTS) {
+            warn(amount, 'Giá trị phải từ 0 đến 1.000.000.000 và không có dấu âm.'); activeNumbers = []; i += 2; continue;
+          }
+          if (!activeNumbers.length) { warn(token, 'Từ khóa chưa có danh sách số hợp lệ ở phía trước.'); i += 2; continue; }
+          const shortNumbers = activeNumbers.filter(number => number.value.length === 2);
+          const longNumbers = activeNumbers.filter(number => number.value.length >= 3);
+          if (longNumbers.length && token.category !== 'lo') {
+            warn(token, 'Số từ 3 chữ số trở lên thuộc 3 chân: hãy dùng từ khóa lo, ví dụ 091-190 lo 10.');
+          }
+          const batches = [{ category: token.category, numbers: shortNumbers }];
+          if (token.category === 'lo') batches.push({ category: 'three', numbers: longNumbers });
+          for (const batch of batches) {
+            if (!batch.numbers.length) continue;
+            const addition = value * batch.numbers.length;
+            if (sums[batch.category] + addition > MAX_POINTS) {
+              warn(amount, 'Tổng giá trị ' + names[batch.category] + ' vượt giới hạn 1.000.000.000.'); continue;
+            }
+            sums[batch.category] += addition;
+            if (batch.category === 'da') {
+              entries.push({
+                number: batch.numbers.map(n => n.value).join(' - '),
+                category: 'da',
+                value: addition,
+                line: text.slice(0, batch.numbers[0].start).split('\n').length,
+                keyword: token.category,
+                sourceText: batch.numbers.map(n => n.value).join('-') + ' ' + (token.category || 'da') + ' ' + value
+              });
+            } else {
+              for (const number of batch.numbers) {
+                entries.push({
+                  number: number.value,
+                  category: batch.category,
+                  value,
+                  line: text.slice(0, number.start).split('\n').length,
+                  keyword: token.category,
+                  sourceText: number.value + ' ' + (token.category || batch.category) + ' ' + value
+                });
+              }
+            }
+          }
+          i += 2;
+        }
+        return { entries, sums, warnings };
+      }
+      function calculate(sums, region = 'central') {
+        const rules = getRegion(region);
+        const result = {};
+        for (const category of ['lo', 'da', 'three']) {
+          const value = sums[category] || 0;
+          const initial = Math.round(value * rules.initial[category]);
+          const payable = Math.round(value * rules.payable[category]);
+          result[category] = { initial, payable, profit: initial - payable };
+        }
+
+        const classicDd = sums.dd || 0;
+        const dau = sums.dau || 0;
+        const duoi = sums.duoi || 0;
+        let initialDd = 0;
+        let payableDd = 0;
+
+        if (classicDd > 0) {
+          if (region === 'central') {
+            initialDd += Math.round(classicDd * 2 * 1000 / 1.2);
+            payableDd += Math.round(classicDd * 2 * 710);
+          } else {
+            initialDd += Math.round(classicDd * rules.initial.dd);
+            payableDd += Math.round(classicDd * rules.payable.dd);
+          }
+        }
+
+        if (dau > 0 || duoi > 0) {
+          if (region === 'central') {
+            initialDd += Math.round((dau + duoi) * 10000);
+            payableDd += Math.round((dau + duoi) * 1.2 * 710);
+          } else {
+            initialDd += Math.round((dau * 4 + duoi * 1) * 1000);
+            payableDd += Math.round((dau * 4 + duoi * 1) * 810);
+          }
+        }
+
+        result.dd = { initial: initialDd, payable: payableDd, profit: initialDd - payableDd };
+
+        result.total = ['dd', 'lo', 'da', 'three'].reduce((total, key) => {
+          for (const field of ['initial', 'payable', 'profit']) total[field] += result[key][field];
+          return total;
+        }, { initial: 0, payable: 0, profit: 0 });
+        return result;
+      }
+      function getWinAmount(entry, region = 'central', times = 1) {
+        const rates = winningRates[region] || winningRates.central;
+        const rate = rates[entry.category] || 0;
+        const count = Number(times) || 0;
+        return Math.round(entry.value * rate * count);
+      }
+      function calculateWinnings(entries, winSelection, region = 'central') {
+        let total = 0;
+        if (!winSelection) return 0;
+        if (typeof winSelection.get === 'function' && typeof winSelection.entries === 'function') {
+          for (const [idx, count] of winSelection.entries()) {
+            const entry = entries[Number(idx)];
+            const n = Number(count) || 0;
+            if (entry && n > 0) total += getWinAmount(entry, region, n);
+          }
+        } else if (Array.isArray(winSelection) || winSelection instanceof Set || (typeof winSelection[Symbol.iterator] === 'function' && typeof winSelection.get !== 'function')) {
+          for (const idx of winSelection) {
+            const entry = entries[Number(idx)];
+            if (entry) total += getWinAmount(entry, region, 1);
+          }
+        } else if (typeof winSelection === 'object') {
+          for (const [idx, count] of Object.entries(winSelection)) {
+            const entry = entries[Number(idx)];
+            const n = Number(count) || 0;
+            if (entry && n > 0) total += getWinAmount(entry, region, n);
+          }
+        }
+        return total;
+      }
+      const formatMoney = value => Math.round(value).toLocaleString('vi-VN') + ' VNĐ';
+      return Object.freeze({ parse, calculate, getWinAmount, calculateWinnings, formatMoney, SAMPLE, NORTH_SAMPLE, names, regions, winningRates });
+    })();
+  </script>
+  <script>
+    'use strict';
+    const $ = id => document.getElementById(id);
+    let region = 'central', current = Calculator.parse(''), filter = 'all', toastTimer;
+    const winCounts = new Map();
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    const numberFormat = value => value.toLocaleString('vi-VN', { maximumFractionDigits: 8 });
+    const moneyHtml = value => numberFormat(value) + ' <span class="currency">VNĐ</span>';
+    function renderCards() {
+      const results = Calculator.calculate(current.sums, region);
+      const settings = [ ['total', 'Tổng cộng chung', 'TỔNG QUAN', 'i-sum'], ['dd', 'Đầu đuôi', 'DD', 'i-arrows'], ['lo', 'Lô', 'LÔ', 'i-grid'], ['da', 'Đá', 'ĐÁ', 'i-link'], ['three', '3 chân', '3+', 'i-grid'] ];
+      $('cards').innerHTML = settings.map(([key, name, tag, icon]) => {
+        const data = results[key], total = key === 'total', prefix = total ? 'Tổng tiền' : 'Tiền';
+        const count = total ? current.entries.length : current.entries.filter(entry => entry.category === key).length;
+        const winningHtml = total ? `
+          <div class="winning-summary-box">
+            <div class="winning-box-title">ĐỐI SOÁT TRÚNG THƯỞNG</div>
+            <div class="winning-box-grid">
+              <div class="winning-sub-box">
+                <div class="winning-sub-title">Tổng tiền trúng (<span id="win-badge-count">0</span> mục)</div>
+                <div class="winning-sub-val" id="win-total-val">0 <span class="currency">VNĐ</span></div>
+              </div>
+              <div class="winning-sub-box" id="net-result-box">
+                <div class="winning-sub-title">Kết quả (Trúng − Trả cái)</div>
+                <div class="winning-sub-val" id="net-result-val">0 <span class="currency">VNĐ</span></div>
+                <div class="winning-sub-status status-neutral" id="net-result-status">Chưa có số trúng</div>
+              </div>
+            </div>
+          </div>
+        ` : '';
+        const totalPoints = key === 'dd'
+          ? ((current.sums.dd || 0) + (current.sums.dau || 0) + (current.sums.duoi || 0))
+          : current.sums[key];
+        return `<article class="panel result-card ${key}" aria-label="Bảng ${name}"><div class="card-top"><div class="card-heading"><span class="category-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h3>${name}</h3></div><span class="category-tag">${tag}</span></div><table class="money-table" aria-label="Kết quả ${name}"><tbody><tr><th scope="row">${prefix} xác</th><td>${moneyHtml(data.initial)}</td></tr><tr><th scope="row">${prefix} phải trả cho cái</th><td>${moneyHtml(data.payable)}</td></tr><tr class="profit"><th scope="row">${prefix} lời</th><td>${moneyHtml(data.profit)}</td></tr></tbody></table>${winningHtml}<div class="category-total">${total ? `${numberFormat(count)} mục · 4 thể loại` : `${numberFormat(totalPoints)} ${key === 'dd' ? 'giá trị nhập' : 'điểm'} · ${numberFormat(count)} mục`}</div></article>`;
+      }).join('');
+    }
+    function updateWinningsUI() {
+      const results = Calculator.calculate(current.sums, region);
+      const payable = results.total.payable;
+      const totalWin = Calculator.calculateWinnings(current.entries, winCounts, region);
+      const net = totalWin - payable;
+      let wonItems = 0;
+      let wonTimes = 0;
+      for (const count of winCounts.values()) {
+        if (count > 0) {
+          wonItems++;
+          wonTimes += count;
+        }
+      }
+
+      if ($('win-badge-count')) {
+        $('win-badge-count').textContent = wonTimes > wonItems
+          ? `${numberFormat(wonItems)} (${wonTimes} lượt)`
+          : numberFormat(wonItems);
+      }
+      if ($('win-total-val')) $('win-total-val').innerHTML = moneyHtml(totalWin);
+      
+      if ($('net-result-val') && $('net-result-status')) {
+        if (wonItems === 0 && payable === 0) {
+          $('net-result-val').innerHTML = '0 <span class="currency">VNĐ</span>';
+          $('net-result-status').className = 'winning-sub-status status-neutral';
+          $('net-result-status').textContent = 'Chưa có dữ liệu';
+        } else if (wonItems === 0) {
+          $('net-result-val').innerHTML = `-${numberFormat(payable)} <span class="currency">VNĐ</span>`;
+          $('net-result-status').className = 'winning-sub-status status-loss';
+          $('net-result-status').textContent = `Âm ${numberFormat(payable)} VNĐ`;
+        } else if (net > 0) {
+          $('net-result-val').innerHTML = `+${numberFormat(net)} <span class="currency">VNĐ</span>`;
+          $('net-result-status').className = 'winning-sub-status status-win';
+          $('net-result-status').textContent = `Lời ${numberFormat(net)} VNĐ`;
+        } else if (net < 0) {
+          $('net-result-val').innerHTML = `-${numberFormat(Math.abs(net))} <span class="currency">VNĐ</span>`;
+          $('net-result-status').className = 'winning-sub-status status-loss';
+          $('net-result-status').textContent = `Âm ${numberFormat(Math.abs(net))} VNĐ`;
+        } else {
+          $('net-result-val').innerHTML = '0 <span class="currency">VNĐ</span>';
+          $('net-result-status').className = 'winning-sub-status status-neutral';
+          $('net-result-status').textContent = 'Huề tiền';
+        }
+      }
+    }
+    function renderDetails() {
+      const allEntriesWithIndex = current.entries.map((entry, index) => ({...entry, rawIndex: index}));
+      const entries = allEntriesWithIndex.filter(entry => filter === 'all' || entry.category === filter);
+      $('entry-count').textContent = `${numberFormat(current.entries.length)} mục được nhận diện`;
+      const visible = entries.slice(0, 1000);
+      $('detail-body').innerHTML = visible.length ? visible.map((entry, idx) => {
+        const times = winCounts.get(entry.rawIndex) || 0;
+        const isWon = times > 0;
+        const winAmount = Calculator.getWinAmount(entry, region, times);
+        const labelText = entry.label || Calculator.names[entry.category];
+        const multText = times > 1 ? ` <small style="font-size:10px;color:#15803d;font-weight:600">(x${times})</small>` : '';
+        return `<tr class="${isWon ? 'row-won' : ''}">` +
+          `<td class="col-stt">${String(idx + 1).padStart(2, '0')}</td>` +
+          `<td class="col-win"><input type="number" min="0" max="99" class="win-input ${isWon ? 'has-win' : ''}" data-index="${entry.rawIndex}" value="${times > 0 ? times : ''}" placeholder="0" aria-label="Số lần trúng ${escapeHtml(entry.number)} ${labelText}"></td>` +
+          `<td><span class="number-chip">${escapeHtml(entry.number)}</span></td>` +
+          `<td><span class="type-chip ${entry.category}">${labelText}</span></td>` +
+          `<td class="col-val">${numberFormat(entry.value)}</td>` +
+          `<td class="win-cell ${isWon ? 'win-active' : ''}">${isWon ? moneyHtml(winAmount) + multText : '<span style="color:#cbd5e1">—</span>'}</td>` +
+          `<td class="col-source"><span class="source-text">${escapeHtml(entry.sourceText || (entry.number + ' ' + (entry.keyword || entry.category) + ' ' + entry.value))}</span></td>` +
+        `</tr>`;
+      }).join('') : '<tr><td colspan="7" class="table-empty">Chưa có dữ liệu. Nhập tin nhắn hoặc thử dữ liệu mẫu ở trên.</td></tr>';
+      let wonItems = 0, wonTimes = 0;
+      for (const count of winCounts.values()) {
+        if (count > 0) { wonItems++; wonTimes += count; }
+      }
+      $('detail-summary').textContent = entries.length ? `Hiển thị ${numberFormat(visible.length)} / ${numberFormat(entries.length)} mục${filter === 'all' ? '' : ' · ' + Calculator.names[filter]}${wonItems ? ` · Đã nhập trúng ${numberFormat(wonItems)} mục (${numberFormat(wonTimes)} lần)` : ''}` : 'Chưa có dữ liệu để hiển thị';
+      document.querySelectorAll('.filter').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.filter === filter)));
+    }
+    function updateCount() { $('char-count').textContent = `${numberFormat($('message').value.length)} ký tự`; }
+    function notify(text) { clearTimeout(toastTimer); $('toast').textContent = text; $('toast').hidden = false; toastTimer = setTimeout(() => $('toast').hidden = true, 2600); }
+    function run(isSample = false, preserveWins = false) {
+      if (!preserveWins) winCounts.clear();
+      current = Calculator.parse($('message').value, region);
+      document.querySelectorAll('[data-region]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.region === region)));
+      $('region-description').textContent = region === 'north'
+        ? 'Miền Bắc: đá tính gộp theo cặp ở mỗi dòng. Số từ 3 chữ số + lo vào bảng 3 chân, thu 20.000 và trả cái 18.000 mỗi điểm.'
+        : 'Miền Trung: đá tính gộp theo cặp ở mỗi dòng. Số từ 3 chữ số + lo vào bảng 3 chân, tiền xác 13.500 và trả cái 12.000 mỗi điểm.';
+      $('stone-example').textContent = 'Cặp đá gộp thành 1 ô có giá trị tương ứng';
+      $('counting-note').textContent = 'Đá được gộp thành từng cặp riêng trên mỗi dòng';
+      renderCards(); renderDetails(); updateWinningsUI(); updateCount();
+      const issues = current.warnings, count = current.entries.length;
+      $('warnings').hidden = !issues.length;
+      $('warnings').innerHTML = issues.length ? `<p><strong>Có ${numberFormat(issues.length)} cảnh báo.</strong> Kết quả chỉ gồm phần cú pháp hợp lệ.</p><ul>${issues.slice(0, 5).map(issue => `<li>Dòng ${issue.line}: ${escapeHtml(issue.message)} ${issue.fragment ? `<code>“${escapeHtml(issue.fragment)}”</code>` : ''}</li>`).join('')}</ul>${issues.length > 5 ? '<p>Và ' + (issues.length - 5) + ' cảnh báo khác. Hãy kiểm tra lại nội dung.</p>' : ''}` : '';
+      $('status').classList.remove('stale');
+      $('status').textContent = count ? `Đã tính ${count} mục${issues.length ? ` · ${issues.length} cảnh báo` : ' · Không có lỗi cú pháp'}.` : ($('message').value.trim() ? 'Chưa tìm thấy cú pháp hợp lệ. Hãy kiểm tra các cảnh báo.' : 'Sẵn sàng tính toán.');
+      $('result-badge').innerHTML = '<span class="dot"></span>' + Calculator.regions[region].name + ' · ' + (isSample ? 'Dữ liệu mẫu' : issues.length ? 'Cần kiểm tra cú pháp' : count ? 'Đã tính toán' : 'Chưa có dữ liệu');
+    }
+    $('detail-body').addEventListener('input', event => {
+      const target = event.target;
+      if (target && target.classList && target.classList.contains('win-input')) {
+        const idx = Number(target.dataset.index);
+        let val = parseInt(target.value, 10);
+        if (!Number.isFinite(val) || val <= 0) {
+          val = 0;
+          winCounts.delete(idx);
+          target.classList.remove('has-win');
+        } else {
+          if (val > 99) { val = 99; target.value = 99; }
+          winCounts.set(idx, val);
+          target.classList.add('has-win');
+        }
+        const tr = target.closest('tr');
+        if (tr) {
+          if (val > 0) tr.classList.add('row-won');
+          else tr.classList.remove('row-won');
+          const winCell = tr.querySelector('.win-cell');
+          if (winCell) {
+            const entry = current.entries[idx];
+            if (entry && val > 0) {
+              const winAmount = Calculator.getWinAmount(entry, region, val);
+              const multText = val > 1 ? ` <small style="font-size:10px;color:#15803d;font-weight:600">(x${val})</small>` : '';
+              winCell.className = 'win-cell win-active';
+              winCell.innerHTML = moneyHtml(winAmount) + multText;
+            } else {
+              winCell.className = 'win-cell';
+              winCell.innerHTML = '<span style="color:#cbd5e1">—</span>';
+            }
+          }
+        }
+        updateWinningsUI();
+      }
+    });
+    $('detail-body').addEventListener('change', event => {
+      const target = event.target;
+      if (target && target.classList && target.classList.contains('win-input')) {
+        const val = parseInt(target.value, 10);
+        if (!Number.isFinite(val) || val <= 0) {
+          target.value = '';
+        }
+      }
+    });
+    if ($('btn-select-all')) {
+      $('btn-select-all').addEventListener('click', () => {
+        current.entries.forEach((_, idx) => winCounts.set(idx, 1));
+        renderDetails();
+        updateWinningsUI();
+        notify('Đã đặt tất cả mục trúng 1 lần');
+      });
+    }
+    if ($('btn-clear-win')) {
+      $('btn-clear-win').addEventListener('click', () => {
+        winCounts.clear();
+        renderDetails();
+        updateWinningsUI();
+        notify('Đã xóa tất cả số lần trúng');
+      });
+    }
+    $('calculate').addEventListener('click', () => {
+      run();
+      if (current.entries.length) notify('Đã cập nhật kết quả tính toán');
+      if (window.matchMedia('(max-width: 640px)').matches) {
+        $('message').blur();
+        $('results').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      }
+    });
+    document.querySelector('a[href="#guide"]').addEventListener('click', () => { $('guide').open = true; });
+    $('sample').addEventListener('click', () => { $('message').value = region === 'north' ? Calculator.NORTH_SAMPLE : Calculator.SAMPLE; filter = 'all'; run(true); notify('Đã tải dữ liệu mẫu ' + Calculator.regions[region].name); });
+    $('clear').addEventListener('click', () => { $('message').value = ''; filter = 'all'; run(); $('message').focus(); notify('Đã xóa dữ liệu'); });
+    $('message').addEventListener('input', () => { updateCount(); $('status').classList.add('stale'); $('status').textContent = 'Nội dung đã thay đổi. Bấm “Tính Toán” để cập nhật kết quả.'; $('result-badge').innerHTML = '<span class="dot"></span>' + Calculator.regions[region].name + ' · Chờ tính lại'; });
+    $('message').addEventListener('keydown', event => { if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); run(); } });
+    document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => { filter = button.dataset.filter; renderDetails(); }));
+    document.querySelectorAll('[data-region]').forEach(button => button.addEventListener('click', () => {
+      if (region === button.dataset.region) return;
+      region = button.dataset.region;
+      run(false, true);
+      notify('Đã tính lại theo ' + Calculator.regions[region].name);
+    }));
+    $('message').value = '';
+    run();
+  </script>
+</body>
+</html>

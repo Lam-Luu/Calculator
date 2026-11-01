@@ -1,1 +1,6 @@
+node_modules/
 so-tinh/
+test.mjs
+so-tinh/test.mjs
+*.test.js
+*.test.mjs
