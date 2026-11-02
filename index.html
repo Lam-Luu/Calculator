@@ -200,13 +200,13 @@
         const sums = { dd: 0, lo: 0, da: 0, three: 0 };
         if (text.length > 100000) return { entries, sums, warnings: [{line: 1, fragment: '', message: 'Tin nhắn vượt quá 100.000 ký tự.'}] };
         // Unicode boundaries prevent matching keywords inside unrelated words.
-        const lexer = /(?<![\p{L}\p{N}_])(?:đầu\s+đuôi|dau\s+duoi|dd|đầu|dau|đuôi|duoi|lô|lo|đá|da)(?![\p{L}\p{N}_])|\d+(?:\.\d+)?|[\s,;:|\-–—]+|[^\s\d,;:|\-–—]+/giu;
+        const lexer = /(?<![\p{L}\p{N}_])(?:đầu\s+đuôi|đầu\s+đui|dau\s+duoi|dau\s+dui|dd|đầu|dau|đuôi|duoi|đui|dui|lô|lo|đá|da)(?![\p{L}\p{N}_])|\d+(?:\.\d+)?|[\s,;:|\-–—]+|[^\s\d,;:|\-–—]+/giu;
         let match;
         while ((match = lexer.exec(text))) {
           const value = match[0];
           if (/^[\s,;:|\-–—]+$/u.test(value)) continue;
           const plain = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ');
-          const aliases = { dd: 'dd', 'dau duoi': 'dd', dau: 'dau', duoi: 'duoi', lo: 'lo', da: 'da' };
+          const aliases = { dd: 'dd', 'dau duoi': 'dd', 'dau dui': 'dd', dau: 'dau', duoi: 'duoi', dui: 'duoi', lo: 'lo', da: 'da' };
           const category = Object.hasOwn(aliases, plain) ? aliases[plain] : undefined;
           tokens.push({ type: category ? 'key' : /^\d+(?:\.\d+)?$/.test(value) ? 'number' : 'unknown', category, value, start: match.index, end: lexer.lastIndex });
         }
