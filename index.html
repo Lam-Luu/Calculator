@@ -126,7 +126,7 @@
         <div class="actions"><button id="calculate" class="button primary" type="button"><svg aria-hidden="true"><use href="#i-calc"/></svg>Tính Toán</button><button id="clear" class="button secondary" type="button"><svg aria-hidden="true"><use href="#i-trash"/></svg>Xóa Dữ Liệu</button></div>
         <p class="keyboard-hint">Mẹo nhỏ: Ctrl / ⌘ + Enter để tính nhanh</p>
         <div class="status-line" id="status" role="status" aria-live="polite">Sẵn sàng tính toán.</div>
-        <details class="syntax" id="guide"><summary>Hướng dẫn nhập tin nhắn <svg aria-hidden="true"><use href="#i-chevron"/></svg></summary><p>Cấu trúc: danh sách số → thể loại → giá trị</p><div class="example"><code>07 lo 30 dd 140</code><span>Một số, nhiều thể loại</span></div><div class="example"><code>88-39-79 dd 10</code><span>Mỗi số nhận 10</span></div><div class="example"><code>45 đầu 10 đuôi 40</code><span>Đầu 10 · Đuôi 40</span></div><div class="example"><code>24-42 da 2</code><span id="stone-example">Cặp đá gộp thành 1 ô có giá trị tương ứng</span></div><div class="example example-three"><code>091-190 lo 10</code><span>3 chân · mỗi số 10</span></div><div class="aliases"><strong>Đầu đuôi:</strong> dd, đầu đuôi, đầu ... đuôi ...<br><strong>Lô:</strong> lo, lô &nbsp; · &nbsp; <strong>Đá:</strong> da, đá<br>Số 2 chữ số: đầu đuôi, đầu/đuôi, lô, đá. Số từ 3 chữ số trở lên + lo: 3 chân. Điểm thập phân dùng dấu chấm.</div></details>
+        <details class="syntax" id="guide"><summary>Hướng dẫn nhập tin nhắn <svg aria-hidden="true"><use href="#i-chevron"/></svg></summary><p>Cấu trúc: danh sách số → thể loại → giá trị</p><div class="example"><code>07 lo 30 dd 140</code><span>Một số, nhiều thể loại</span></div><div class="example"><code>88-39-79 dd 10</code><span>Mỗi số nhận 10</span></div><div class="example"><code>45 đầu 10 đuôi 40</code><span>Đầu 10 · Đuôi 40</span></div><div class="example"><code>24-42 da 2</code><span id="stone-example">Cả cặp 2 điểm, trúng tính 2 điểm</span></div><div class="example example-three"><code>091-190 lo 10</code><span>3 chân · mỗi số 10</span></div><div class="aliases"><strong>Đầu đuôi:</strong> dd, đầu đuôi, đầu ... đuôi ...<br><strong>Lô:</strong> lo, lô &nbsp; · &nbsp; <strong>Đá:</strong> da, đá<br>Số 2 chữ số: đầu đuôi, đầu/đuôi, lô, đá. Số từ 3 chữ số trở lên + lo: 3 chân. Điểm thập phân dùng dấu chấm.</div></details>
       </section>
       <section id="results" aria-labelledby="results-heading"><div class="result-heading"><h2 id="results-heading">Kết quả tính toán</h2><span class="result-badge" id="result-badge"><span class="dot"></span>Chưa có dữ liệu</span></div><div id="warnings" class="notice" role="status" hidden></div><div class="cards" id="cards" aria-live="polite" aria-atomic="true"></div><p class="result-footnote"><svg aria-hidden="true"><use href="#i-info"/></svg>Tiền được làm tròn đến đồng tại mỗi thể loại. Tổng cộng bằng tổng các bảng đã làm tròn.</p></section>
     </div>
@@ -168,7 +168,7 @@
       </div>
       <div class="table-footer">
         <span id="detail-summary">Chưa có dữ liệu để hiển thị</span>
-        <span id="counting-note">Đá được gộp thành từng cặp riêng trên mỗi dòng</span>
+        <span id="counting-note">Đá: điểm trúng tính một lần cho cả cặp, không nhân theo số</span>
       </div>
     </section>
     <footer class="app-footer"><span class="footer-sign"><svg aria-hidden="true"><use href="#i-book"/></svg>Sổ Tính · Công cụ tính tiền tin nhắn</span><span>Dữ liệu chỉ được xử lý trong trình duyệt.</span></footer>
@@ -394,10 +394,11 @@
             }
             sums[batch.category] += addition;
             if (batch.category === 'da') {
+              // Thu/trả cái tính theo từng số; tiền trúng dùng điểm nhập cho cả cặp.
               entries.push({
                 number: batch.numbers.map(n => n.value).join(' - '),
                 category: 'da',
-                value: addition,
+                value,
                 line: text.slice(0, batch.numbers[0].start).split('\n').length,
                 keyword: token.category,
                 sourceText: batch.numbers.map(n => n.value).join('-') + ' ' + (token.category || 'da') + ' ' + value
@@ -528,6 +529,7 @@
         ` : '';
         const totalPoints = key === 'dd'
           ? ((current.sums.dd || 0) + (current.sums.dau || 0) + (current.sums.duoi || 0))
+          : key === 'da' ? current.entries.filter(entry => entry.category === 'da').reduce((sum, entry) => sum + entry.value, 0)
           : current.sums[key];
         return `<article class="panel result-card ${key}" aria-label="Bảng ${name}"><div class="card-top"><div class="card-heading"><span class="category-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h3>${name}</h3></div><span class="category-tag">${tag}</span></div><table class="money-table" aria-label="Kết quả ${name}"><tbody><tr><th scope="row">${prefix} xác</th><td>${moneyHtml(data.initial)}</td></tr><tr><th scope="row">${prefix} phải trả cho cái</th><td>${moneyHtml(data.payable)}</td></tr><tr class="profit"><th scope="row">${prefix} lời</th><td>${moneyHtml(data.profit)}</td></tr></tbody></table>${winningHtml}<div class="category-total">${total ? `${numberFormat(count)} mục · 4 thể loại` : `${numberFormat(totalPoints)} ${key === 'dd' ? 'giá trị nhập' : 'điểm'} · ${numberFormat(count)} mục`}</div></article>`;
       }).join('');
@@ -614,8 +616,8 @@
       $('region-description').textContent = region === 'north'
         ? 'Miền Bắc: đá tính gộp theo cặp ở mỗi dòng. Số từ 3 chữ số + lo vào bảng 3 chân, thu 20.000 và trả cái 18.000 mỗi điểm.'
         : 'Miền Trung: đá tính gộp theo cặp ở mỗi dòng. Số từ 3 chữ số + lo vào bảng 3 chân, tiền xác 13.500 và trả cái 12.000 mỗi điểm.';
-      $('stone-example').textContent = 'Cặp đá gộp thành 1 ô có giá trị tương ứng';
-      $('counting-note').textContent = 'Đá được gộp thành từng cặp riêng trên mỗi dòng';
+      $('stone-example').textContent = 'Cả cặp 2 điểm, trúng tính 2 điểm';
+      $('counting-note').textContent = 'Đá: điểm trúng tính một lần cho cả cặp, không nhân theo số';
       renderCards(); renderDetails(); updateWinningsUI(); updateCount();
       const issues = current.warnings, count = current.entries.length;
       $('warnings').hidden = !issues.length;
