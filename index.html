@@ -151,11 +151,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     .auto-buttons{display:flex;gap:10px;align-items:center}
     .auto-buttons .button{min-height:42px;height:42px;padding:0 16px;font-size:12px;font-weight:600;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:all .18s ease;white-space:nowrap}
     #draw-check{background:#ffffff;border:1px solid #ccd4be;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
-    #draw-check:hover:not(:disabled){background:#eef4e8;border-color:var(--accent);color:#193427}
-    #draw-check.is-ready{background:var(--accent);border-color:var(--accent);color:#ffffff;box-shadow:0 2px 6px rgba(41,78,62,0.22)}
-    #draw-check.is-ready:hover:not(:disabled){background:#1c382b;border-color:#1c382b}
-    #draw-refresh{background:var(--accent);border:1px solid var(--accent);color:#ffffff;box-shadow:0 2px 6px rgba(41,78,62,0.2)}
-    #draw-refresh:hover:not(:disabled){background:#1c382b;border-color:#1c382b}
+    #draw-check:hover:not(:disabled){background:#eef4e8;border-color:var(--accent);color:var(--accent)}
+    #draw-check.is-ready{background:var(--accent);border-color:var(--accent);color:#ffffff !important;box-shadow:0 2px 6px rgba(41,78,62,0.22)}
+    #draw-check.is-ready:hover:not(:disabled),#draw-check.is-ready:active,#draw-check.is-ready:focus-visible{background:#1c382b;border-color:#1c382b;color:#ffffff !important}
+    #draw-refresh{background:var(--accent);border:1px solid var(--accent);color:#ffffff !important;box-shadow:0 2px 6px rgba(41,78,62,0.2)}
+    #draw-refresh:hover:not(:disabled),#draw-refresh:active,#draw-refresh:focus-visible{background:#1c382b;border-color:#1c382b;color:#ffffff !important}
     .auto-buttons .button:disabled{cursor:not-allowed;background:#ebeee4;color:#919c88;border-color:#d7ddcd;box-shadow:none;opacity:.85}
     #draw-date-hint{font-size:11px;color:#788470;margin:6px 0 0;line-height:1.5}
     .auto-status-card{margin-top:16px;padding:14px 18px;border-radius:10px;background:#f8faf3;border:1px solid #dce2d2;position:relative}
