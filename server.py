@@ -5,6 +5,7 @@ import argparse
 from datetime import date, datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
 import re
 import threading
@@ -188,10 +189,11 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', type=int, default=5173)
+    parser.add_argument('--host', type=str, default=os.environ.get('HOST', '0.0.0.0'))
+    parser.add_argument('--port', type=int, default=int(os.environ.get('PORT', 5173)))
     args = parser.parse_args()
-    server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
-    print(f'So Tinh: http://127.0.0.1:{args.port}', flush=True)
+    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    print(f'So Tinh: http://{args.host}:{args.port}', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
