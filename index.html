@@ -218,7 +218,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       <div class="auto-heading"><h2 id="auto-heading">Dò kết quả tự động</h2><label class="auto-toggle"><input id="auto-enabled" type="checkbox" checked>Tự cập nhật mỗi phút</label></div>
       <div class="auto-fields">
         <div class="auto-field"><label for="draw-date-view">Ngày mở thưởng (ngày/tháng/năm)</label><div class="date-control"><input id="draw-date-view" class="date-readable" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="dd/mm/yyyy" aria-describedby="draw-date-hint"><button class="date-open" id="draw-calendar" type="button" aria-label="Chọn ngày mở thưởng bằng lịch"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 11h16"/></svg></button><input id="draw-date" class="native-datepicker" type="date" tabindex="-1" aria-label="Lịch chọn ngày mở thưởng"></div></div>
-        <div class="auto-field"><span id="draw-station-label">Chọn một đài để dò</span><div id="draw-station" class="station-options" role="radiogroup" aria-labelledby="draw-station-label"><span class="station-placeholder">Đang tải danh sách đài…</span></div></div>
+        <div class="auto-field"><span id="draw-station-label">Đài dò theo ngày</span><div id="draw-station" class="station-options" role="radiogroup" aria-labelledby="draw-station-label"><span class="station-placeholder">Đang tải đài theo ngày…</span></div></div>
         <div class="auto-buttons"><button class="button" id="draw-check" type="button">Kiểm tra kết quả ↻</button><button class="button" id="draw-refresh" type="button" style="display:none" hidden disabled>Chờ kết quả</button></div>
       </div>
       <p id="draw-date-hint" class="auto-meta" role="status" aria-live="polite"></p>
@@ -228,7 +228,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <div id="auto-manual-note" class="auto-manual-note"></div>
       </div>
       <details class="auto-results"><summary>Bảng kết quả của đài đã chọn</summary><div id="draw-board" class="draws"></div></details>
-      <details class="auto-rules"><summary>Cách dò Đầu / Đuôi, Lô, 3 chân và Đá</summary><p>Miền Trung: Đầu = 2 số cuối giải 8; Đuôi = 2 số cuối giải đặc biệt.<br>Miền Bắc: Đầu = 2 số cuối của 4 số giải 7; Đuôi = 2 số cuối giải đặc biệt.<br>Lô: đếm số lần xuất hiện của 2 số cuối ở tất cả giải. 3 chân: dò 3 số cuối, chỉ tự dò mục có đúng 3 chữ số.<br>Đá: đủ các số trong cặp ở bất kỳ giải nào của cùng một đài thì trúng 1 lần, không nhân theo số lần xuất hiện.<br>Chỉ dò đài đang chọn. Đổi đài sẽ tính lại các ô trúng theo đài mới, không cộng hoặc ghép số giữa hai đài.</p><p>Số đã sửa tay được giữ khi cập nhật hoặc bấm Tính Toán. Bấm “Dò lại toàn bộ” để thay tất cả bằng kết quả tự dò. “Bỏ trúng” sẽ tắt tự dò; “Xóa Dữ Liệu” vẫn xóa toàn bộ các ô trúng.</p></details>
+      <details class="auto-rules"><summary>Cách dò Đầu / Đuôi, Lô, 3 chân và Đá</summary><p>Miền Trung: Đầu = 2 số cuối giải 8; Đuôi = 2 số cuối giải đặc biệt.<br>Miền Bắc: Đầu = 2 số cuối của 4 số giải 7; Đuôi = 2 số cuối giải đặc biệt.<br>Lô: đếm số lần xuất hiện của 2 số cuối ở tất cả giải. 3 chân: dò 3 số cuối, chỉ tự dò mục có đúng 3 chữ số.<br>Đá: đủ các số trong cặp ở bất kỳ giải nào của cùng một đài thì trúng 1 lần, không nhân theo số lần xuất hiện.<br>Miền Trung tự chọn đài theo ngày: thứ 2 Phú Yên, thứ 3 Đắk Lắk, thứ 4 Khánh Hòa, thứ 5 Bình Định, thứ 6 Gia Lai, thứ 7 Quảng Ngãi, chủ nhật Khánh Hòa. Chỉ dò kết quả của đài này.</p><p>Số đã sửa tay được giữ khi cập nhật hoặc bấm Tính Toán. Bấm “Dò lại toàn bộ” để thay tất cả bằng kết quả tự dò. “Bỏ trúng” sẽ tắt tự dò; “Xóa Dữ Liệu” vẫn xóa toàn bộ các ô trúng.</p></details>
     </section>
     <div class="workspace">
       <section class="panel input-panel" aria-labelledby="input-heading">
@@ -671,7 +671,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     function stationNames() {
       const data = autoState.data;
       if (!data) return [];
-      return [...new Set([...(Array.isArray(data.expectedStations) ? data.expectedStations : []), ...data.draws.map(draw => draw.station)])].filter(station => typeof station === 'string' && station.length > 0);
+      return (Array.isArray(data.expectedStations) ? data.expectedStations : []).filter(station => typeof station === 'string' && station.length > 0);
     }
     function todayVN() {
       return Calculator.getDrawWindow(region).today;
@@ -740,7 +740,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       const ready = readyToMatch();
       const busy = Boolean(autoState.controller);
       $('draw-refresh').disabled = busy || !ready;
-      $('draw-refresh').textContent = ready ? 'Dò lại toàn bộ' : region === 'central' && !autoState.station ? 'Chọn đài để dò' : 'Chờ kết quả';
+      $('draw-refresh').textContent = ready ? 'Dò lại toàn bộ' : 'Chờ kết quả';
       $('draw-check').disabled = busy;
       $('draw-check').textContent = busy ? 'Đang kiểm tra…' : ready ? 'Cập nhật & Dò số ↻' : 'Kiểm tra kết quả ↻';
       if (ready) $('draw-check').classList.add('is-ready');
@@ -748,7 +748,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
     function waitingDrawMessage() {
       const day = displayDrawDate();
-      if (region === 'central' && !autoState.station) return `Các đài ở trên là lịch mở thưởng ngày ${day}. Chọn một đài; chỉ tự dò khi đã nhận đủ kết quả.`;
+      if (region === 'central' && !autoState.station) return `Đang chờ đài dò theo ngày ${day}. Chỉ tự dò khi đã nhận đủ kết quả.`;
       const station = region === 'north' ? 'Miền Bắc' : autoState.station;
       return selectedDraws().length
         ? `${station} · ${day}: chưa đủ các giải. Chưa thể dò trúng.`
@@ -779,7 +779,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       const data = autoState.data;
       const draws = selectedDraws();
       const order = region === 'north' ? ['7', '6', '5', '4', '3', '2', '1', 'DB'] : ['8', '7', '6', '5', '4', '3', '2', '1', 'DB'];
-      $('draw-board').innerHTML = draws.length ? draws.map(draw => `<div class="draw-card"><h3 class="draw-title">${escapeHtml(draw.station)}<small>${draw.complete ? 'Đã đủ giải' : 'Chưa đủ giải'}</small></h3><table class="draw-table" aria-label="Kết quả ${escapeHtml(draw.station)}"><tbody>${order.map(key => `<tr><th scope="row">${key === 'DB' ? 'ĐB' : 'G.' + key}</th><td>${(draw.prizes[key] || []).map(escapeHtml).join(' ') || '—'}</td></tr>`).join('')}</tbody></table></div>`).join('') : `<p class="auto-result-caption">${region === 'central' && !autoState.station ? 'Chọn một đài ở trên để xem và dò kết quả.' : 'Chưa có bảng kết quả cho đài và ngày đã chọn.'}</p>`;
+      $('draw-board').innerHTML = draws.length ? draws.map(draw => `<div class="draw-card"><h3 class="draw-title">${escapeHtml(draw.station)}<small>${draw.complete ? 'Đã đủ giải' : 'Chưa đủ giải'}</small></h3><table class="draw-table" aria-label="Kết quả ${escapeHtml(draw.station)}"><tbody>${order.map(key => `<tr><th scope="row">${key === 'DB' ? 'ĐB' : 'G.' + key}</th><td>${(draw.prizes[key] || []).map(escapeHtml).join(' ') || '—'}</td></tr>`).join('')}</tbody></table></div>`).join('') : '<p class="auto-result-caption">Chưa có bảng kết quả cho đài và ngày đã chọn.</p>';
       if (data) {
         const time = new Date(data.fetchedAt).toLocaleTimeString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' });
         const link = /^https:\/\/xosodaiphat\.com\/[a-z0-9.-]+$/.test(data.sourceUrl) ? data.sourceUrl : 'https://xosodaiphat.com/rss.html';
@@ -788,9 +788,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
     function populateStations() {
       const stations = region === 'north' ? ['Miền Bắc'] : stationNames();
-      if (region === 'central' && autoState.data && !stations.includes(autoState.station)) autoState.station = '';
-      $('draw-station-label').textContent = region === 'north' ? 'Đài cần dò' : 'Đài mở thưởng theo lịch · chọn một đài';
-      $('draw-station').innerHTML = stations.length ? stations.map(station => `<label class="station-choice"><input type="radio" name="draw-station" value="${escapeHtml(station)}"${region === 'north' || station === autoState.station ? ' checked' : ''}${region === 'north' ? ' disabled' : ''}><span>${escapeHtml(station)}</span></label>`).join('') : '<span class="station-placeholder">Đang tải danh sách đài…</span>';
+      autoState.station = stations[0] || '';
+      $('draw-station-label').textContent = region === 'north' ? 'Đài cần dò' : 'Đài dò theo ngày';
+      $('draw-station').innerHTML = autoState.station ? `<label class="station-choice"><input type="radio" name="draw-station" value="${escapeHtml(autoState.station)}" checked disabled><span>${escapeHtml(autoState.station)}</span></label>` : '<span class="station-placeholder">Đang tải đài theo ngày…</span>';
     }
     function scheduleDrawRefresh() {
       clearTimeout(autoState.timer);
@@ -927,7 +927,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         $('win-total-val').innerHTML = autoState.manual.size || totalWin > 0 ? moneyHtml(totalWin) : '—';
         $('net-result-val').innerHTML = '—';
         $('net-result-status').className = 'winning-sub-status status-neutral';
-        $('net-result-status').textContent = region === 'central' && !autoState.station ? 'Chọn một đài để dò' : readyToMatch() && unmatched ? 'Tạm tính · Còn mục cần nhập tay' : autoState.manual.size ? 'Tạm tính từ ô nhập tay · Chờ đủ kết quả' : 'Chờ đủ kết quả để dò';
+        $('net-result-status').textContent = readyToMatch() && unmatched ? 'Tạm tính · Còn mục cần nhập tay' : autoState.manual.size ? 'Tạm tính từ ô nhập tay · Chờ đủ kết quả' : 'Chờ đủ kết quả để dò';
         return;
       }
 
@@ -1169,18 +1169,6 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       const picker = $('draw-date');
       if (typeof picker.showPicker === 'function') picker.showPicker();
       else { picker.focus(); picker.click(); }
-    });
-    $('draw-station').addEventListener('change', event => {
-      const target = event.target;
-      if (region !== 'central' || target.name !== 'draw-station' || !target.checked || !stationNames().includes(target.value) || autoState.station === target.value) return;
-      autoState.station = target.value;
-      winCounts.clear();
-      autoState.manual.clear();
-      autoState.automatic.clear();
-      updateManualNote();
-      renderDetails(); updateWinningsUI();
-      renderDrawBoard();
-      if (!applyAutomaticWins()) showDrawStatus(waitingDrawMessage());
     });
     $('auto-enabled').addEventListener('change', () => {
       if ($('auto-enabled').checked) refreshDraws();

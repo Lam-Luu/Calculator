@@ -68,13 +68,46 @@ class FeedTests(unittest.TestCase):
             self.assertEqual(waiting['draws'], [])
             self.assertEqual(server.get_results('north', '2026-10-01')['status'], 'unavailable')
 
-    def test_all_central_stations_must_exist_before_region_is_complete(self):
+    def test_other_central_stations_cannot_replace_the_configured_station(self):
         days = server.parse_feed(feed('central', FIXTURE['central'][:1]), 'central')
         with patch.object(server, 'load_feed', return_value=(days, '2026-11-04T12:00:00Z')):
-            self.assertEqual(server.get_results('central', '2026-11-04')['status'], 'pending')
-        days = server.parse_feed(feed('central'), 'central')
+            result = server.get_results('central', '2026-11-04')
+            self.assertEqual(result['status'], 'pending')
+            self.assertEqual(result['draws'], [])
+            self.assertEqual(result['expectedStations'], ['Khánh Hòa'])
+
+    def test_only_configured_central_station_is_returned_for_each_weekday(self):
+        stations = ['Phú Yên', 'Đắk Lắk', 'Khánh Hòa', 'Bình Định',
+                    'Gia Lai', 'Quảng Ngãi', 'Khánh Hòa']
+        for offset, station in enumerate(stations):
+            with self.subTest(station=station, weekday=offset):
+                day = datetime(2026, 10, 26) + timedelta(days=offset)
+                draws = deepcopy(FIXTURE['central'])
+                target = deepcopy(draws[1])
+                target['station'] = station
+                draws = [draw for draw in draws if draw['station'] != station] + [target]
+                days = server.parse_feed(feed('central', draws, day.strftime('%d/%m/%Y')), 'central')
+                with patch.object(server, 'load_feed', return_value=(days, '2026-11-04T12:00:00Z')):
+                    result = server.get_results('central', day.date().isoformat())
+                self.assertEqual(result['expectedStations'], [station])
+                self.assertEqual(result['draws'], [target])
+                self.assertEqual(result['status'], 'complete')
+
+    def test_configured_central_station_does_not_wait_for_other_stations(self):
+        days = server.parse_feed(feed('central', FIXTURE['central'][1:]), 'central')
         with patch.object(server, 'load_feed', return_value=(days, '2026-11-04T12:00:00Z')):
             self.assertEqual(server.get_results('central', '2026-11-04')['status'], 'complete')
+
+    def test_partial_configured_central_station_stays_pending(self):
+        draws = deepcopy(FIXTURE['central'])
+        del draws[1]['prizes']['DB']
+        days = server.parse_feed(feed('central', draws), 'central')
+        with patch.object(server, 'load_feed', return_value=(days, '2026-11-04T12:00:00Z')):
+            result = server.get_results('central', '2026-11-04')
+        self.assertEqual(result['status'], 'pending')
+        self.assertEqual(len(result['draws']), 1)
+        self.assertEqual(result['draws'][0]['station'], 'Khánh Hòa')
+        self.assertFalse(result['draws'][0]['complete'])
 
     def test_invalid_queries_and_future_date(self):
         for region, day in [('south', '2026-11-04'), ('north', '04/11/2026'), ('north', '2026-02-30'),

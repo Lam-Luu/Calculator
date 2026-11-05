@@ -16,7 +16,7 @@ Phải dùng `server.py` cho tính năng lấy kết quả. Mở trực tiếp H
 
 ## Tự dò trúng
 
-- Chọn miền ở đầu trang, ngày mở thưởng và đài cần dò. Miền Trung hiển thị từng đài thành nút chọn, chỉ dò một đài tại một thời điểm và không tự chọn thay bạn. Miền Bắc có một bảng chung.
+- Chọn miền ở đầu trang và ngày mở thưởng. Miền Trung tự chọn đúng một đài theo ngày: thứ 2 Phú Yên, thứ 3 Đắk Lắk, thứ 4 Khánh Hòa, thứ 5 Bình Định, thứ 6 Gia Lai, thứ 7 Quảng Ngãi, chủ nhật Khánh Hòa. API bỏ kết quả các đài khác và giao diện không hiển thị nút chọn đài dư. Miền Bắc có một bảng chung.
 - Bật **Tự cập nhật mỗi phút**, nhập tin nhắn, bấm **Tính Toán**. Khi đủ kết quả, các ô trúng tự điền và tổng tiền tự cập nhật. Web kiểm tra lại mỗi phút trong lúc trang đang mở.
 - Theo giờ Việt Nam, **miền Trung từ 17:15**, **miền Bắc từ 18:15** mới được chọn ngày hôm nay. Trước giờ đó, lịch chỉ cho chọn đến hôm qua và mặc định mở ngày gần nhất được phép. Vẫn dò được các ngày cũ. Đến đúng giờ, hôm nay tự được mở chọn, không cần tải lại trang; nếu đang theo dõi ngày gần nhất, web tự chuyển sang hôm nay. Nếu đã chọn một ngày cũ khác, web giữ ngày đó. API cũng khóa hôm nay trước mốc giờ, không lấy cả dữ liệu cache hoặc dữ liệu nguồn về sớm.
 - Ngày luôn hiển thị và được nhập theo **ngày/tháng/năm**. Danh sách đài là lịch mở thưởng, không có nghĩa đã có kết quả. Khi chưa có đủ giải, nút dò bị khóa; **Kiểm tra cập nhật** chỉ kiểm tra lại nguồn, không tạo số trúng.
@@ -36,9 +36,9 @@ Luôn dò số cuối dãy: `53046` đối chiếu `46` khi dò 2 số và `046`
 | 3 chân | Đếm lượt 3 số cuối, giữ số 0 đầu | Đếm lượt 3 số cuối, giữ số 0 đầu |
 | Đá | Các số của cặp cùng xuất hiện trong một đài thì trúng 1 lần | Các số của cặp cùng xuất hiện thì trúng 1 lần |
 
-Đá không nhân theo lượt lặp; không ghép số giữa hai đài. Cặp lặp cùng số cần ít nhất hai lượt xuất hiện. Chỉ dùng kết quả của đài đang chọn; đổi đài sẽ tính lại toàn bộ trúng theo đài mới, gồm cả các ô đã sửa tay ở đài cũ. Các mục 3 chân có hơn 3 chữ số được để nhập tay và có thông báo.
+Đá không nhân theo lượt lặp; không ghép số giữa hai đài. Cặp lặp cùng số cần ít nhất hai lượt xuất hiện. Chỉ dùng kết quả của đài được quy định cho ngày đang dò. Các mục 3 chân có hơn 3 chữ số được để nhập tay và có thông báo.
 
-Lịch đài miền Trung giúp hiển thị đài để chọn trước khi có kết quả; cần cập nhật `CENTRAL_STATIONS` trong `server.py` nếu lịch hoặc tên đài của nguồn thay đổi. Nếu đài đã chọn có đủ giải, có thể dò ngay mà không phải chờ đài khác.
+Lịch đài miền Trung trong `CENTRAL_STATIONS` của `server.py` quy định đài duy nhất được trả về và tự chọn theo ngày. Khi đài này có đủ giải, có thể dò ngay mà không phải chờ đài khác.
 
 ## Kiểm tra
 

@@ -30,11 +30,10 @@ SHAPES = {
 MAX_FEED_BYTES = 512_000
 CACHE_TTL = 60
 DRAW_TIMES = {'central': (17, 15), 'north': (18, 15)}
-# Monday first, matching the stations named in the provider's weekly feed.
+# Monday first: only use the configured station for each day's matching.
 CENTRAL_STATIONS = (
-    ('Phú Yên', 'Huế'), ('Đắk Lắk', 'Quảng Nam'), ('Đà Nẵng', 'Khánh Hòa'),
-    ('Bình Định', 'Quảng Trị', 'Quảng Bình'), ('Gia Lai', 'Ninh Thuận'),
-    ('Đà Nẵng', 'Quảng Ngãi', 'Đắk Nông'), ('Khánh Hòa', 'Kon Tum', 'Huế'),
+    ('Phú Yên',), ('Đắk Lắk',), ('Khánh Hòa',), ('Bình Định',),
+    ('Gia Lai',), ('Quảng Ngãi',), ('Khánh Hòa',),
 )
 _cache: dict = {}
 _locks = {region: threading.Lock() for region in SOURCES}
@@ -139,6 +138,8 @@ def get_results(region: str, day: str, *, now: datetime | None = None) -> dict:
     days, fetched_at = load_feed(region)
     selected = days.get(day)
     draws = selected['draws'] if selected else []
+    if region == 'central':
+        draws = [draw for draw in draws if draw['station'] in expected]
     if draws:
         status = 'complete' if all(draw['complete'] for draw in draws) and set(expected) == {d['station'] for d in draws} else 'pending'
     elif day < min(days):
