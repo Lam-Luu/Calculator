@@ -193,6 +193,30 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     .auto-result-caption{font-size:11px;color:#8d967e;margin:10px 0}
     @media(max-width:860px){.auto-fields{grid-template-columns:1fr 1fr}.auto-buttons{grid-column:1/-1;justify-content:stretch}.auto-buttons .button{flex:1}}
     @media(max-width:580px){.auto-panel{padding:18px 16px}.auto-fields{grid-template-columns:1fr}.auto-heading{flex-direction:column;align-items:flex-start;gap:10px}.auto-toggle{align-self:flex-start}.station-choice span{min-height:38px;padding:7px 13px;font-size:12px}.auto-buttons{flex-direction:column;width:100%}.auto-buttons .button{width:100%}}
+    .combined-panel{margin-top:28px;overflow:hidden}
+    .combined-heading{padding:23px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}
+    .combined-heading h2{margin:0;font-size:18px;font-weight:600;color:var(--accent)}
+    .combined-heading p{margin:5px 0 0;font-size:11px;color:var(--muted)}
+    .combined-scroll{overflow-x:auto;scrollbar-width:thin}
+    .combined-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+    .combined-table th,.combined-table td{padding:19px 22px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+    .combined-table thead th{background:#f5f6ee;font-size:11px;font-weight:500;color:var(--muted)}
+    .combined-table th:first-child{text-align:left}
+    .combined-table tbody th{font-size:13px;font-weight:600;color:var(--accent)}
+    .combined-table th small{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:4px}
+    .combined-table td{font-size:17px}
+    .combined-table .currency{font-size:9px;color:var(--muted);margin-left:3px}
+    .combined-table .combined-net{font-weight:600}
+    .combined-table .positive{color:#496c35}.combined-table .negative{color:#a65443}
+    .combined-table tfoot{background:#234638;color:#fffef3}
+    .combined-table tfoot th{font-size:14px;font-weight:600}
+    .combined-table tfoot td{font-size:21px}
+    .combined-table tfoot th,.combined-table tfoot td{border-bottom:0;padding-top:23px;padding-bottom:23px}
+    .combined-table tfoot .currency{color:#acbea1}
+    .combined-table tfoot .positive{color:#dbebaf}.combined-table tfoot .negative{color:#f0b8a6}
+    .combined-note{font-size:11px;line-height:1.7;color:var(--muted);margin:0;padding:13px 26px}
+    @media(max-width:1180px){.combined-table th,.combined-table td{padding:16px 14px}.combined-table td{font-size:15px}.combined-table tfoot td{font-size:18px}}
+    @media(max-width:760px){.combined-heading{padding:20px}.combined-heading h2{font-size:16px}.combined-heading .category-tag{display:none}.combined-table{min-width:790px}.combined-note{padding:12px 20px;font-size:10px}}
   </style>
 </head>
 <body>
@@ -244,6 +268,14 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       </section>
       <section id="results" aria-labelledby="results-heading"><div class="result-heading"><h2 id="results-heading">Kết quả tính toán</h2><span class="result-badge" id="result-badge"><span class="dot"></span>Chưa có dữ liệu</span></div><div id="warnings" class="notice" role="status" hidden></div><div class="cards" id="cards" aria-live="polite" aria-atomic="true"></div><p class="result-footnote"><svg aria-hidden="true"><use href="#i-info"/></svg>Tiền được làm tròn đến đồng tại mỗi thể loại. Tổng cộng bằng tổng các bảng đã làm tròn.</p></section>
     </div>
+    <section class="panel combined-panel" aria-labelledby="combined-heading">
+      <div class="combined-heading"><div><h2 id="combined-heading">Tổng cộng hai miền</h2><p>Miền Trung và Miền Bắc · Miền chưa nhập được tính là 0.</p></div><span class="category-tag">TRUNG + BẮC</span></div>
+      <div class="combined-scroll"><table class="combined-table" aria-label="Tổng hợp tiền Miền Trung và Miền Bắc (VNĐ)">
+        <thead><tr><th scope="col">Khu vực</th><th scope="col">Tiền xác</th><th scope="col">Trả cái</th><th scope="col">Tiền lời</th><th scope="col">Tiền trúng</th><th scope="col">Trúng − Trả cái</th></tr></thead>
+        <tbody id="combined-body"></tbody><tfoot id="combined-total"></tfoot>
+      </table></div>
+      <p class="combined-note" id="combined-note" role="status"></p>
+    </section>
     <section class="panel details-panel" aria-labelledby="details-heading">
       <div class="details-heading">
         <div class="details-title-group">
@@ -662,7 +694,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     'use strict';
     const $ = id => document.getElementById(id);
     let region = 'central', current = Calculator.parse(''), filter = 'all', toastTimer;
-    const winCounts = new Map();
+    let winCounts = new Map();
+    // Each region owns its message, parsed bets and win selections for this session.
+    const regionalData = Object.fromEntries(['central', 'north'].map(key => [key, {
+      message: '', current: Calculator.parse('', key), winCounts: new Map(),
+      manual: new Set(), automatic: new Set(), data: null,
+      summary: { initial: 0, payable: 0, profit: 0, winnings: 0, net: 0, count: 0, pending: false }
+    }]));
     const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
     const numberFormat = value => value.toLocaleString('vi-VN', { maximumFractionDigits: 8 });
     const moneyHtml = value => numberFormat(value) + ' <span class="currency">VNĐ</span>';
@@ -923,7 +961,10 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       if ($('win-total-val')) $('win-total-val').innerHTML = moneyHtml(totalWin);
 
       const unmatched = current.entries.some((entry, index) => entry.category === 'three' && entry.number.length !== 3 && entry.value > 0 && !autoState.manual.has(index));
-      if ($('auto-enabled').checked && current.entries.length && (!readyToMatch() || unmatched)) {
+      const pending = Boolean($('auto-enabled').checked && current.entries.length && (!readyToMatch() || unmatched));
+      regionalData[region].summary = { ...results.total, winnings: totalWin, net, count: current.entries.length, pending };
+      renderCombinedSummary();
+      if (pending) {
         $('win-total-val').innerHTML = autoState.manual.size || totalWin > 0 ? moneyHtml(totalWin) : '—';
         $('net-result-val').innerHTML = '—';
         $('net-result-status').className = 'winning-sub-status status-neutral';
@@ -954,6 +995,26 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           $('net-result-status').textContent = 'Huề tiền';
         }
       }
+    }
+    function renderCombinedSummary() {
+      const fields = ['initial', 'payable', 'profit', 'winnings', 'net'];
+      const total = { initial: 0, payable: 0, profit: 0, winnings: 0, net: 0 };
+      const cells = summary => fields.map(field => {
+        const value = summary[field];
+        const tone = field === 'net' ? ` class="combined-net ${value > 0 ? 'positive' : value < 0 ? 'negative' : ''}"` : '';
+        return `<td${tone}>${moneyHtml(value)}</td>`;
+      }).join('');
+      $('combined-body').innerHTML = ['central', 'north'].map(key => {
+        const summary = regionalData[key].summary;
+        fields.forEach(field => total[field] += summary[field]);
+        const status = summary.count ? `${numberFormat(summary.count)} mục${summary.pending ? ' · Tạm tính' : ''}` : 'Chưa nhập';
+        return `<tr data-summary-region="${key}"><th scope="row">${Calculator.regions[key].name}<small>${status}</small></th>${cells(summary)}</tr>`;
+      }).join('');
+      $('combined-total').innerHTML = `<tr><th scope="row">Tổng hai miền</th>${cells(total)}</tr>`;
+      const pendingRegions = ['central', 'north'].filter(key => regionalData[key].summary.pending).map(key => Calculator.regions[key].name);
+      $('combined-note').textContent = pendingRegions.length
+        ? `Tạm tính · ${pendingRegions.join(', ')} còn chờ đủ kết quả hoặc nhập trúng tay. Tiền trúng hiện chưa đầy đủ.`
+        : 'Đơn vị: VNĐ. Kết quả chung = Tổng tiền trúng hai miền − Tổng tiền trả cái hai miền.';
     }
     function renderDetails() {
       const allEntriesWithIndex = current.entries.map((entry, index) => ({...entry, rawIndex: index}));
@@ -1115,17 +1176,31 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => { filter = button.dataset.filter; renderDetails(); }));
     document.querySelectorAll('[data-region]').forEach(button => button.addEventListener('click', () => {
       if (region === button.dataset.region) return;
+      Object.assign(regionalData[region], { message: $('message').value, current, winCounts,
+        manual: autoState.manual, automatic: autoState.automatic, data: autoState.data });
+      autoState.controller?.abort();
+      autoState.controller = null;
+      autoState.serial++;
+      clearTimeout(autoState.timer);
       region = button.dataset.region;
+      const saved = regionalData[region];
+      $('message').value = saved.message;
+      current = saved.current;
+      winCounts = saved.winCounts;
+      autoState.manual = saved.manual;
+      autoState.automatic = saved.automatic;
       const window = updateDateLimits();
       if ($('draw-date').value > window.latestDate) setDrawDate(window.latestDate);
       autoState.acceptedDate = $('draw-date').value;
       scheduleDateUnlock();
-      autoState.data = null;
-      clearAutomaticWins(false);
+      autoState.data = saved.data?.date === $('draw-date').value ? saved.data : null;
+      if (!autoState.data) clearAutomaticWins(false);
       populateStations();
+      renderDrawBoard();
+      $('draw-meta').textContent = autoState.data ? $('draw-meta').textContent : 'Đang lấy kết quả cho miền đã chọn.';
       run(false, true);
       if (typeof fetch === 'function') refreshDraws();
-      notify('Đã tính lại theo ' + Calculator.regions[region].name);
+      notify('Đã chuyển sang ' + Calculator.regions[region].name);
     }));
     $('draw-refresh').addEventListener('click', () => { if (readyToMatch()) return refreshDraws(true); });
     $('draw-check').addEventListener('click', () => refreshDraws(readyToMatch()));
