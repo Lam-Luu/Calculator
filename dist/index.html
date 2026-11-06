@@ -594,8 +594,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         if (dau > 0 || duoi > 0) {
           if (region === 'central') {
-            initialDd += Math.round((dau + duoi) * 10000);
-            payableDd += Math.round((dau + duoi) * 1.2 * 7100);
+            initialDd += Math.round((dau + duoi) * 1000 / 1.2);
+            payableDd += Math.round((dau + duoi) * 710);
           } else {
             initialDd += Math.round((dau * 4 + duoi * 1) * 1000);
             payableDd += Math.round((dau * 4 + duoi * 1) * 810);
